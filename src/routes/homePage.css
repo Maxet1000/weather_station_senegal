@@ -1,0 +1,142 @@
+.mainHome{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 10px;
+}
+
+.addNews{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 10px;
+    border: gray 5px dashed;
+    border-radius: 10px;
+    width: 80vw;
+    justify-content: center;
+    color: gray;
+    font-weight: bold;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.addNews:hover{
+    background-color: rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+}
+
+.addNewsMain{
+    height: 0px;
+    top: -100px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: 0.5s;
+    align-items: center;
+}
+
+.openAddNews{
+    height: fit-content!important;
+    transition: height 0.5s;
+}
+
+.addNewsMain img{
+    width: 80%;
+    height: fit-content;
+    border-radius: 10px;
+    background-color: white;  
+    margin: 0px 10px 10px 10px;
+}
+
+.addNewsText{
+    display: flex;
+    flex-direction: column;
+    width: 80%;
+    margin: 10px;
+}
+
+.addNewsText textarea{
+    width: 90%;
+    border-radius: 20px !important;
+    padding: 10px;
+    border-color: black;
+    resize: none;
+    overflow: scroll;
+    height: 200px;
+    border: #ccc 1px solid;
+}
+
+.addNewsText input{
+    width: 20vw;
+    height: 20px;
+    margin: 10px;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+    padding: 5px;
+    font-size: 1.2em;
+    box-shadow: 0px 0px 2.5px rgba(0, 0, 0, 0.5);
+}
+
+.imagePicer{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+}
+
+.titleDiv{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.titleDiv select{
+    width: 100px;
+    height: 30px;
+    border: none;
+    border-radius: 50px;
+    border: gray 1px solid;
+    cursor: pointer;
+    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2);
+}
+
+.addNews button{
+    width: 100px;
+    height: 30px;
+    background-color: rgb(87, 255, 87);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2);
+    margin: 10px;
+}
+
+.addsecondMain{
+    display: flex;
+    flex-direction: row; 
+}
+
+.addNews button:hover{
+    background-color: rgb(87, 255, 87, 0.5);
+}
+
+@media all and (max-width: 700px) {
+    .addsecondMain{
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .addNewsText{
+        align-items: center;
+    }
+
+    .titleDiv{
+        flex-direction: column;
+        align-items: center;
+        margin: 10px;
+    }
+
+    .addNewsText input{
+        width: 70vw;
+    }
+}

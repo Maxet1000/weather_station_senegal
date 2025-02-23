@@ -1,0 +1,165 @@
+.sideBar{
+    width: 350px;
+    overflow: auto;
+    box-shadow: 5px 0 3px -3px #00000030;
+    height: calc(100vh - 70px);
+    margin-right: 10px;
+    transition: left 0.3s ease-in-out;
+    left: -100%;
+    position: fixed;
+    top: 70px;
+    z-index: 1000;
+    background-color: #fff;
+}
+
+.mainCardElement{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    background-color: white;
+    z-index: 100;
+}
+
+.open{
+    left: 0;
+}
+
+.city{
+    top: -250px;
+    transition: 0.5s;
+    position: relative;
+    height: 0px;
+}
+
+.openCity{
+    top: 0px;
+    height: 100px !important;
+    transition: 0.5s;
+    background-color: #a5a5a5;
+}
+
+.cardElement{
+    overflow: hidden;
+    display: flex;
+    width: 100%;
+    text-align: center;
+    flex-direction: column;
+    justify-content: center;
+    height: auto;
+    transition: 0.5s;
+}
+.cardElement h3{
+    margin-top: 0px;
+    margin-bottom: 0px;
+    height: 70px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    position: relative;
+}
+
+.selected{
+    box-shadow: 0px 0px 10px 5px #00000030;
+}
+
+.selected h3{
+    background-color: white;
+    z-index: 100;
+}
+
+.cardHover:hover{
+    background-color: #b9b9b9;
+    cursor: pointer;
+    color: black;
+    transition: 0.5s;
+    border-radius: 10px;
+}
+
+.city h4{
+    color: rgb(255, 255, 255);
+}
+
+.createNewCity{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: gray 5px dashed;
+    border-radius: 10px;
+    color: gray;
+}
+
+.createNewCity:hover{
+    background-color: #ccc;
+    cursor: pointer;
+}
+
+.createNewCity input{
+    width: 20vw;
+    height: 20px;
+    margin: 10px;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+    padding: 5px;
+    font-size: 1.2em;
+    box-shadow: 0px 0px 2.5px rgba(0, 0, 0, 0.5);
+}
+
+.createNewCity button{
+    width: 100px;
+    height: 30px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2);
+    margin: 10px;
+}
+
+a i {
+    color: #000;
+}
+
+a i:hover {
+    color: #ccc;
+    cursor: pointer;
+}
+
+@media all and (max-width: 700px){
+    .sideBar{
+        overflow: auto;
+        z-index: 1000;
+        box-shadow: 5px 0 3px -3px #00000030;
+        height: 90vh;
+        margin-right: 10px;
+        transition: left 0.3s ease-in-out;
+        position: fixed;
+        background-color: #fff;
+        width: 100% !important;
+        left: -100% ;
+    }
+
+    .open{
+        left: 0;
+    }
+
+    .cardElement{
+        display: flex;
+        width: 100%;
+        text-align: center;
+        flex-direction: column;
+        justify-content: center;
+        transition: 0.5s;
+        font-size: 20px;
+    }
+
+    .cardElement:hover{
+       
+    }
+
+    .city h4{
+        color: rgb(255, 255, 255);
+        margin-top: 10px;
+    }
+}
