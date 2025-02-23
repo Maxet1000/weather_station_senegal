@@ -1,0 +1,44 @@
+.header{
+    justify-content: space-between;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+    display: flex;
+    height: 70px;
+    font-weight: bold;
+    padding-left: 10px;
+    align-items: center;
+    position: fixed;
+    width: 100%;
+    background-color: white;
+    z-index: 100;
+}
+
+.header i:hover{
+    cursor: pointer;
+    color: gray;
+}
+
+.header h2{
+    padding-left: 10px;
+}
+
+.menuOption{
+    display: flex;
+    align-items: center;
+}
+
+.menuOption:hover{
+    cursor: pointer;
+    color: gray;
+}
+
+@media all and (max-width: 700px){
+    .header i:hover{
+        cursor: pointer;
+        color: gray;
+    }
+
+    .header i{
+        font-size: x-large;
+    }
+}
+

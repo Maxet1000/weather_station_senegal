@@ -1,0 +1,45 @@
+:root {
+    --button-bg-color: #3d6f13;
+    --button-active-brightness: 0.8;
+  }
+
+  .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    height: 85vh;
+  }
+
+  .image {
+    max-width: 75%;
+    height: auto;
+  }
+
+  .text {
+    margin-top: 20px;
+    font-size: 1.2em;
+    font-weight: bold;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+  
+  .button {
+    margin-top: 20px;
+    padding: 10px 20px;
+    font-size: 1em;
+    cursor: pointer;
+    background-color: var(--button-bg-color);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    text-decoration: none;
+    display: inline-block;
+    text-transform: uppercase;
+    font-weight: bold;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+
+  .button:active {
+    filter: brightness(var(--button-active-brightness))
+  }

@@ -1,0 +1,64 @@
+.loggin{
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    height: 88vh;
+}
+
+.loggin form{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.loggin input{
+    width: 300px;
+    height: 40px;
+    margin: 10px;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+    padding: 5px;
+    font-size: 1.2em;
+    box-shadow: 0px 0px 2.5px rgba(0, 0, 0, 0.5);
+}
+
+.loggin input[type="radio"]{
+    width: 20px;
+    height: 20px;
+    margin: 10px;
+}
+
+.loggin input[type="submit"]:hover{
+    cursor: pointer;
+    transition: 0.3s;
+    background-color: #ccc;
+}
+
+.loggin img{
+    width: 60%;
+}
+
+.signUp h4 button{
+    background-color: white;
+    border: none;
+    color: #c57c98;
+    font-weight: bold;
+}
+
+.passwordDiv i:hover{
+    cursor: pointer;
+    color: gray !important;
+}
+
+@media all and (max-width: 700px){
+    .loggin img{
+        width: 100vw;
+    }
+
+    .loggin form{
+        width: 90vw;
+    }
+}
