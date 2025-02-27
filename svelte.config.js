@@ -1,6 +1,5 @@
 import adapter from '@sveltejs/adapter-cloudflare';
-import pkg from 'svelte-preprocess';
-const { vitePreprocess } = pkg;
+import { vitePreprocess } from '@sveltejs/vite-plugin-svelte'; // Alternative import
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
