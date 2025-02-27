@@ -1,12 +1,17 @@
 import adapter from '@sveltejs/adapter-cloudflare';
-import sveltePreprocess from '@sveltejs/vite-plugin-svelte'; // CHANGED: Import the default export
+import { vitePreprocess } from '@sveltejs/kit/vite'; // revert to use vitePreprocess
+import { preprocess } from '@sveltejs/vite-plugin-svelte';
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
-    preprocess: sveltePreprocess(), // CHANGED: Use the default export
-
-    kit: {
-        adapter: adapter({
+	preprocess: [
+		vitePreprocess(),
+		preprocess({
+      		postcss: true,
+    }),
+	],
+	kit: {
+		adapter: adapter({
             // default options are shown. On some platforms
             // these options are set automatically — see below
             routes: {
@@ -14,7 +19,7 @@ const config = {
                 exclude: ['<all>']
             }
         })
-    }
+	}
 };
 
 export default config;
