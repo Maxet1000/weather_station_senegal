@@ -732,7 +732,7 @@ function create_universal_fetch(event, state, fetched, csr, resolve_opts) {
         dependency = { response, body: null };
         state.prerendering.dependencies.set(url.pathname, dependency);
       }
-    } else {
+    } else if (url.protocol === "https:" || url.protocol === "http:") {
       const mode = input instanceof Request ? input.mode : init2?.mode ?? "cors";
       if (mode === "no-cors") {
         response = new Response("", {
@@ -1390,11 +1390,29 @@ function create_server_routing_response(route, params, url, manifest) {
   });
   if (route) {
     const csr_route = generate_route_object(route, url, manifest);
-    const body2 = `export const route = ${csr_route}; export const params = ${JSON.stringify(params)};`;
+    const body2 = `${create_css_import(route, url, manifest)}
+export const route = ${csr_route}; export const params = ${JSON.stringify(params)};`;
     return { response: text(body2, { headers: headers2 }), body: body2 };
   } else {
     return { response: text("", { headers: headers2 }), body: "" };
   }
+}
+function create_css_import(route, url, manifest) {
+  const { errors, layouts, leaf } = route;
+  let css = "";
+  for (const node of [...errors, ...layouts.map((l) => l?.[1]), leaf[1]]) {
+    if (typeof node !== "number") continue;
+    const node_css = manifest._.client.css?.[node];
+    for (const css_path of node_css ?? []) {
+      css += `'${assets || base}/${css_path}',`;
+    }
+  }
+  if (!css) return "";
+  return `${create_client_import(
+    /** @type {string} */
+    manifest._.client.start,
+    url
+  )}.then(x => x.load_css([${css}]));`;
 }
 const updated = {
   ...readable(false),
@@ -2743,7 +2761,7 @@ async function respond(request, options2, manifest, state) {
     fetch: null,
     getClientAddress: state.getClientAddress || (() => {
       throw new Error(
-        `${"@sveltejs/adapter-auto"} does not specify getClientAddress. Please raise an issue`
+        `${"@sveltejs/adapter-cloudflare"} does not specify getClientAddress. Please raise an issue`
       );
     }),
     locals: {},
