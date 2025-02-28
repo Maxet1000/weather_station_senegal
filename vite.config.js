@@ -5,12 +5,13 @@ export default defineConfig({
     plugins: [sveltekit()],
     server: {
         proxy: {
-            '/ftp': {  // Proxy any requests starting with '/ftp'
+            '/ftp': {
                 target: 'https://senegal.marvin.vito.be',
                 changeOrigin: true,
-                //  Optional:  If you need to rewrite the path, you can add a rewrite rule:
-                // rewrite: (path) => path.replace(/^\/ftp/, '') // Removes /ftp from the request path
             }
         }
+    },
+    build: { // Add this build section
+        outDir: 'build' // Explicitly set the output directory to 'build'
     }
 });
