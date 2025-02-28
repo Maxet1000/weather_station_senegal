@@ -8,7 +8,8 @@
     let csvData = [];
 
     onMount(async () => {
-        const response = await fetch('/ftp/mock_climate_data_10min_full.csv');      const csvText = await response.text();
+        const response = await fetch('https://vito-server-proxy.maxemile-meylaerts.workers.dev/');
+        const csvText = await response.text();
         csvData = Papa.parse(csvText, { header: true,
                                         skipEmptyLines: 'greedy',}).data;
 
