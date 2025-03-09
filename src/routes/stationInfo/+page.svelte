@@ -8,7 +8,8 @@
     let csvData = [];
 
     onMount(async () => {
-        const response = await fetch('https://vito-server-proxy.maxemile-meylaerts.workers.dev/');
+        const url = 'https://vito-server-proxy.maxemile-meylaerts.workers.dev/mock_climate_data_10min_full.csv';
+        const response = await fetch(url);
         const csvText = await response.text();
         csvData = Papa.parse(csvText, { header: true,
                                         skipEmptyLines: 'greedy',}).data;
@@ -91,7 +92,7 @@
 <div style="width: 100%; display: flex; justify-content: center;">
     <!-- svelte-ignore a11y-no-static-element-interactions -->
     <div class="boxHolder">
-        {#if cityName}
+        {#if true}
             <!-- svelte-ignore a11y-click-events-have-key-events -->
             <div class="box pressable" style="background-color:rgb(88, 123, 227);" on:click={() => handleHummidtyClick()}>
                 <div class="boxTitle">
