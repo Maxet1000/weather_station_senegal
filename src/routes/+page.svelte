@@ -15,21 +15,19 @@
 
     let csvData = [];
     let chartData = { datasets: [] }; // Initialize chartData
+    let districtID; // Declare districtID
 
-    onMount(async () => {
-        const url = 'https://vito-server-proxy.maxemile-meylaerts.workers.dev/mock_climate_data_10min_full.csv';
-        const response = await fetch(url);
-        const csvText = await response.text();
-        csvData = Papa.parse(csvText, { header: true,
-                                            skipEmptyLines: 'greedy',}).data;
-
-        updateVariables();
+    async function updateChartData(currentDistrictID) {
+        if (!currentDistrictID) {
+            chartData = { datasets: [] }; // Reset chart if no districtID
+            return;
+        }
 
         // Fetch chart data
-        let barValues = await getBarValues(1);
-        let lineValues = await getLineValues(1);
-        let rangeStartValues = await getRangeStartValues(1);
-        let rangeEndValues = await getRangeEndValues(1);
+        let barValues = await getBarValues(currentDistrictID); // Pass districtID
+        let lineValues = await getLineValues(currentDistrictID); // Pass districtID
+        let rangeStartValues = await getRangeStartValues(currentDistrictID); // Pass districtID
+        let rangeEndValues = await getRangeEndValues(currentDistrictID); // Pass districtID
         const dateArray = generateDatePoints('2025-01-01', 36, 10);
 
         chartData = {
@@ -71,6 +69,33 @@
                 },
             ],
         };
+    }
+
+
+    $: {
+        if ($city === "Louga") {
+            districtID = 35; // Set districtID for Louga
+        } else if ($city === "Linguere") {
+            districtID = 36; // Set districtID for Linguere
+        } else {
+            districtID = undefined; // Or set to a default value if no city is selected
+        }
+         console.log("District ID updated:", districtID, "for city:", $city); // Optional: Log districtID changes
+         updateChartData(districtID); // Update chart data when districtID changes
+    }
+
+
+    onMount(async () => {
+        const url = 'https://vito-server-proxy.maxemile-meylaerts.workers.dev/mock_climate_data_10min_full.csv';
+        const response = await fetch(url);
+        const csvText = await response.text();
+        csvData = Papa.parse(csvText, { header: true,
+                                            skipEmptyLines: 'greedy',}).data;
+
+        updateVariables();
+
+        updateChartData(districtID); // Initial chart data load with default districtID (or undefined)
+
     });
 
     let lol = true;
@@ -154,12 +179,15 @@
 
 <div style="width: 100%; display: flex; flex-direction: column; justify-content: center;">
     <div style="margin-bottom: 10px; width: 100%; display: flex; justify-content: center;">
-        <label for="location-dropdown"></label>
-            <select id="location-dropdown">
-                <option value="genk">Genk</option>
-                <option value="other">Other Location</option>
-                    </select>
+        <div class="dropdown">
+          <select id="city-select" bind:value={$city}>
+            <option value="" disabled selected>Select a city</option>
+            {#each cities as cityName}
+              <option value={cityName}>{cityName}</option>
+            {/each}
+          </select>
         </div>
+    </div>
     <div class="boxHolder">
         {#if true}
             <div class="box pressable" style="background-color:rgb(88, 123, 227);" on:click={() => handleHummidtyClick()}>
