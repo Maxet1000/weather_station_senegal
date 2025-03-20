@@ -106,7 +106,7 @@
             },
             display: true,
             title: { 
-              display: true, 
+              display: false, 
               text: 'Timestamp', 
               color: 'rgba(255, 255, 255, 0.8)'
             },
@@ -122,7 +122,7 @@
             display: true,
             title: { 
               display: true, 
-              text: 'Temperature (°C)',
+              text: 'Température (°C)',
               color: 'rgba(255, 255, 255, 0.8)'
             },
             grid: {

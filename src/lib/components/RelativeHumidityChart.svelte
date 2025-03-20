@@ -107,7 +107,7 @@
               },
               display: true,
               title: { 
-                display: true, 
+                display: false, 
                 text: 'Timestamp', 
                 color: 'rgba(255, 255, 255, 0.8)'
               },
@@ -122,7 +122,7 @@
               display: true,
               title: { 
                 display: true, 
-                text: 'Relative Humidity (%)',
+                text: 'Humidité Relative (%)',
                 color: 'rgba(255, 255, 255, 0.8)'
               },
               grid: {

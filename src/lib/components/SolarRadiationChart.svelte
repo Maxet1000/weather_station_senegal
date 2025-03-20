@@ -103,7 +103,7 @@
               },
               display: true,
               title: { 
-                display: true, 
+                display: false, 
                 text: 'Timestamp', 
                 color: 'rgba(255, 255, 255, 0.8)'
               },
@@ -113,13 +113,12 @@
               ticks: {
                 color: 'rgba(255, 255, 255, 0.8)' // label color for x-axis
               },
-
             },
             y: {
               display: true,
               title: { 
                 display: true, 
-                text: 'Solar Radiation (W/m\u00B2)',
+                text: 'Rayonnement Solaire (W/m\u00B2)',
                 color: 'rgba(255, 255, 255, 0.8)'
               },
               grid: {

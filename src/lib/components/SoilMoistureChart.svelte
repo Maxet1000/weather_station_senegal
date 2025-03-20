@@ -107,7 +107,7 @@
               },
               display: true,
               title: { 
-                display: true, 
+                display: false, 
                 text: 'Timestamp', 
                 color: 'rgba(255, 255, 255, 0.8)'
               },
@@ -125,7 +125,7 @@
               display: true,
               title: { 
                 display: true,
-                text: 'Soil Moisture (m³/m³)',
+                text: 'Humidité du Sol (m³/m³)',
                 color: 'rgba(255, 255, 255, 0.8)'
               },
               // No fixed suggestedMin or suggestedMax so the scale adjusts automatically.

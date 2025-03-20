@@ -105,7 +105,7 @@
               },
               display: true,
               title: { 
-                display: true, 
+                display: false, 
                 text: 'Timestamp', 
                 color: 'rgba(255, 255, 255, 0.8)'
               },
@@ -121,7 +121,7 @@
               display: true,
               title: { 
                 display: true, 
-                text: 'Wind Speed (m/s)',
+                text: 'Vitesse du Vent (m/s)',
                 color: 'rgba(255, 255, 255, 0.8)'
               },
               grid: {
