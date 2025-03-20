@@ -15,7 +15,7 @@
   import {storedStation} from '$lib/stores/locationStore.js';
 
   
-  let station = '1';
+  let station = '';
   let timeframe = 'week';
   
   // Temperature & wind data arrays from 10-min data.
@@ -218,6 +218,7 @@
   });
 
   function handleStationChange(event) {
+    updateData();
     station = event.target.value;
     storedStation.set(station);
   }
@@ -337,7 +338,7 @@
 
 <div class="controls">
   <label for="station">Station: </label>
-  <select id="station" bind:value={station} on:change={updateData, handleStationChange}>
+  <select id="station" bind:value={station} on:change={handleStationChange}>
     <option value="1">Mbar Toubap</option>
     <option value="2">Seno Ndawédiee</option>
     <option value="3">Labgar</option>
