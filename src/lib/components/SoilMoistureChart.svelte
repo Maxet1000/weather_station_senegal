@@ -12,6 +12,8 @@
       TimeScale  // Use TimeScale for date/time values
     } from 'chart.js';
     import 'chartjs-adapter-date-fns'; // Date adapter for time scale
+    import { fr } from 'date-fns/locale'
+
   
     // Chart plugins
     let zoomPlugin;
@@ -76,14 +78,14 @@
                   type: 'box',
                   xMin,
                   xMax,
-                  backgroundColor: 'rgba(255, 206, 86, 0.3)',
-                  borderColor: 'rgba(255, 206, 86, 1)',
+                  backgroundColor: 'rgba(204, 46, 137, 0.3)',
+                  borderColor: 'rgba(204, 46, 137, 1)',
                   borderWidth: 1,
                   label: {
                     display: true,
                     content: [`${clickedDate}`, `Min: ${dailyMin} m³/m³`, `Max: ${dailyMax} m³/m³`],
                     position: 'start',
-                    backgroundColor: 'rgba(255, 206, 86, 0.7)',
+                    backgroundColor: 'rgba(204, 46, 137, 0.7)',
                     color: 'black',
                     font: { size: 12 },
                     padding: 6,
@@ -102,8 +104,12 @@
             x: {
               type: 'time', // Use time scale for x-axis
               time: {
-                tooltipFormat: 'PPpp', // Format for the tooltip (uses date-fns formatting)
-                unit: timeframe === 'day' ? 'hour' : 'day' // Adjust time unit based on timeframe
+                tooltipFormat: "dd MMM, HH:mm",
+                displayFormats: {
+                  hour: 'HH:mm'
+                },
+                unit: timeframe === 'day' ? 'hour' : 'day',
+                locale: fr
               },
               display: true,
               title: { 

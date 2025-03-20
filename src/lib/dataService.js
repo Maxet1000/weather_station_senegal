@@ -52,6 +52,7 @@ export async function fetchStationData(station) {
 // src/lib/dataService.js
 export async function fetchPrecipitationData(station) {
   const url = `https://vito-server-proxy.maxemile-meylaerts.workers.dev/Observations/Station${station}_TableHour.dat`;
+  // for testing purposes in dry season
   //const url = `/mockData/Station${station}_MockHour.dat`;
   try {
     const response = await fetch(url);

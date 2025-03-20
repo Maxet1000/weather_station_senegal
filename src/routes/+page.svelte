@@ -11,8 +11,11 @@
   
   import "./page.css";
   import '@fortawesome/fontawesome-free/css/all.min.css'
+
+  import {storedStation} from '$lib/stores/locationStore.js';
+
   
-  let station = '1';
+  let station = '';
   let timeframe = 'week';
   
   // Temperature & wind data arrays from 10-min data.
@@ -205,8 +208,20 @@
 
   
   onMount(() => {
+    storedStation.subscribe(val => {
+      // Only update if there's a value from the store.
+      if (val) {
+        station = val;
+      }
+    });
     updateData();
   });
+
+  function handleStationChange(event) {
+    updateData();
+    station = event.target.value;
+    storedStation.set(station);
+  }
   
   // Toggle state variables for chart visibility.
   let showTemperatureChart = false;
@@ -322,19 +337,19 @@
 </style>
 
 <div class="controls">
-  <label for="station">Select Station: </label>
-  <select id="station" bind:value={station} on:change={updateData}>
-    <option value="1">Station 1</option>
-    <option value="2">Station 2</option>
-    <option value="3">Station 3</option>
-    <option value="4">Station 4</option>
+  <label for="station">Station: </label>
+  <select id="station" bind:value={station} on:change={handleStationChange}>
+    <option value="1">Mbar Toubap</option>
+    <option value="2">Seno Ndawédiee</option>
+    <option value="3">Labgar</option>
+    <option value="4">Loumbol djiby</option>
   </select>
 
-  <label for="timeframe">Select Timeframe: </label>
+  <label for="timeframe">Période: </label>
   <select id="timeframe" bind:value={timeframe} on:change={updateData}>
-    <option value="month">Past Month</option>
-    <option value="week">Past Week</option>
-    <option value="day">Past Day</option>
+    <option value="month">Dernière Mois</option>
+    <option value="week">Dernière Semaine</option>
+    <option value="day">Dernière Jour</option>
   </select>
 
   <!-- New CSV download button -->
@@ -346,7 +361,7 @@
 <!-- Temperature Chart Box -->
 <button class="box" style="background-color:rgb(204, 93, 81);" on:click={toggleTemperature} aria-expanded={showTemperatureChart}>
     <div class="boxTitle">
-      <h1>Temperature</h1>
+      <h1>Température</h1>
     </div>
     <div class="mainBoxElement">
       <i class="fa-solid fa-temperature-half fa-2xl" style="padding: 10px; color: #ffffff;"></i>
@@ -368,7 +383,7 @@
   <!-- Precipitation Chart Box -->
   <button class="box" style="background-color:rgb(54, 162, 235);" on:click={togglePrecip} aria-expanded={showPrecipChart}>
     <div class="boxTitle">
-      <h1>Precipitation</h1>
+      <h1>Précipitation</h1>
     </div>
     <div class="mainBoxElement">
       <i class="fa-solid fa-cloud-showers-heavy fa-2xl" style="padding: 10px; color: #ffffff;"></i>
@@ -390,7 +405,7 @@
   <!-- Soil Moisture Chart Box -->
   <button class="box" style="background-color:rgb(46,204,113);" on:click={toggleSoilMoisture} aria-expanded={showSoilMoistureChart}>
     <div class="boxTitle">
-      <h1>Soil Moisture</h1>
+      <h1>Humidité du Sol</h1>
     </div>
     <div class="mainBoxElement">
       <i class="fa-solid fa-seedling fa-2xl" style="padding: 10px; color: #ffffff;"></i>
@@ -412,7 +427,7 @@
   <!-- Wind Speed Chart Box -->
   <button class="box" style="background-color: #5486b6;" on:click={toggleWind} aria-expanded={showWindChart}>
     <div class="boxTitle">
-      <h1>Wind Speed</h1>
+      <h1>Vitesse du Vent</h1>
     </div>
     <div class="mainBoxElement">
       <i class="fa-solid fa-wind fa-2xl" style="padding: 10px; color: #ffffff;"></i>
@@ -435,7 +450,7 @@
     <!-- Relative Humidity Chart Box -->
   <button class="box" style="background-color:rgb(255, 159, 64);" on:click={toggleHum} aria-expanded={showHumidityChart}>
     <div class="boxTitle">
-      <h1>Relative Humidity</h1>
+      <h1>Humidité Relative</h1>
     </div>
     <div class="mainBoxElement">
       <i class="fa-solid fa-tint fa-2xl" style="padding: 10px; color: #ffffff;"></i>
@@ -458,7 +473,7 @@
 <!-- Solar Radiation Chart Box -->
 <button class="box" style="background-color:rgb(255,205,86);" on:click={toggleSolarRadiation} aria-expanded={showSolarRadiationChart}>
   <div class="boxTitle">
-    <h1>Solar Radiation</h1>
+    <h1>Rayonnement Solaire</h1>
   </div>
   <div class="mainBoxElement">
     <i class="fa-solid fa-sun fa-2xl" style="padding: 10px; color: #ffffff;"></i>

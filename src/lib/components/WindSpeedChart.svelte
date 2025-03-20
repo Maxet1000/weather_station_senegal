@@ -11,6 +11,8 @@
       TimeScale  // Use TimeScale instead of CategoryScale
     } from 'chart.js';
     import 'chartjs-adapter-date-fns'; // Ensure you import the date adapter
+    import { fr } from 'date-fns/locale'
+
   
     // Chart plugins
     let zoomPlugin;
@@ -74,14 +76,14 @@
                   type: 'box',
                   xMin,
                   xMax,
-                  backgroundColor: 'rgba(255, 206, 86, 0.3)',
-                  borderColor: 'rgba(255, 206, 86, 1)',
+                  backgroundColor: 'rgba(182, 132, 84, 0.3)',
+                  borderColor: 'rgba(182, 132, 84, 1)',
                   borderWidth: 1,
                   label: {
                     display: true,
                     content: [`${clickedDate}`, `Min: ${dailyMin} m/s`, `Max: ${dailyMax} m/s`],
                     position: 'start',
-                    backgroundColor: 'rgba(255, 206, 86, 0.7)',
+                    backgroundColor: 'rgba(182, 132, 84, 0.7)',
                     color: 'black',
                     font: { size: 12 },
                     padding: 6,
@@ -100,8 +102,12 @@
             x: {
               type: 'time',  // Use the time scale
               time: {
-                tooltipFormat: 'PPpp', // Adjust as desired (uses date-fns format)
+                tooltipFormat: "dd MMM, HH:mm",
+                displayFormats: {
+                  hour: 'HH:mm'
+                },
                 unit: timeframe === 'day' ? 'hour' : 'day',
+                locale: fr
               },
               display: true,
               title: { 
