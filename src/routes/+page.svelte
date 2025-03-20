@@ -1,483 +1,480 @@
+<!-- +page.svelte -->
 <script>
-    import { city } from '$lib/stores/locationStore';
-    import PrecipitationChart from '$lib/PrecipitationChart.svelte';
-    import { getBarValues, getLineValues, getRangeStartValues, getRangeEndValues, generateDatePoints, zipXY } from './chart-data.js';
+  import { onMount } from 'svelte';
+  import TemperatureChart from '$lib/components/TemperatureChart.svelte';
+  import WindSpeedChart from '$lib/components/WindSpeedChart.svelte';
+  import PrecipitationChart from '$lib/components/PrecipitationChart.svelte';
+  import RelativeHumidityChart from '$lib/components/RelativeHumidityChart.svelte';
+  import SoilMoistureChart from '$lib/components/SoilMoistureChart.svelte';
+  import SolarRadiationChart from '$lib/components/SolarRadiationChart.svelte';
+  import { fetchStationData, fetchPrecipitationData } from '$lib/dataService.js';
+  
+  import "./page.css";
+  import '@fortawesome/fontawesome-free/css/all.min.css'
+  
+  let station = '1';
+  let timeframe = 'week';
+  
+  // Temperature & wind data arrays from 10-min data.
+  let allTimestamps = [];
+  let allTemperatures = [];
+  let allWinds = [];
+  let allRelativeHumidities = [];
+  let allSoilMoisture = [];  // new array for soil moisture
+  let allSolarRadiation = []; // new array for solar radiation
+  let allPrecipitations10min = [];
+  
+  // Precipitation data arrays (hourly).
+  let allPrecipTimestamps = [];
+  let allPrecipitations = [];
+  
+  // Chart data objects for each chart.
+  let chartData = { labels: [], datasets: [] };
+  let windChartData = { labels: [], datasets: [] };
+  let precipitationChartData = { labels: [], datasets: [] };
+  let humidityChartData = { labels: [], datasets: [] };
+  let soilMoistureChartData = { labels: [], datasets: [] }; // new for soil moisture
+  let solarRadiationChartData = { labels: [], datasets: [] }; // new chart data
 
-    import "./page.css";
-    import '@fortawesome/fontawesome-free/css/all.min.css'
-    import { onMount } from 'svelte';
-    import Papa from 'papaparse';
+  // Reactive latest values.
+  $: latestTemperature = allTemperatures.length ? allTemperatures[allTemperatures.length - 1] : 'N/A';
+  $: latestWind = allWinds.length ? allWinds[allWinds.length - 1] : 'N/A';
+  $: latestPrecipitation = allPrecipitations.length ? allPrecipitations[allPrecipitations.length - 1] : 'N/A';
+  $: latestHumidity = allRelativeHumidities.length ? allRelativeHumidities[allRelativeHumidities.length - 1] : 'N/A';
+  $: latestSoilMoisture = allSoilMoisture.length ? allSoilMoisture[allSoilMoisture.length - 1] : 'N/A';
+  $: latestSolarRadiation = allSolarRadiation.length ? allSolarRadiation[allSolarRadiation.length - 1] : 'N/A';
 
-    const cities = [
-        "Louga",
-        "Linguere"
-    ];
+  
+  // Existing mapping for 10-min data (Temperature, Wind)
+  const datapointsMapping = {
+    day: 144,
+    week: 1008,
+    month: 4464
+  };
 
-    let csvData = [];
-    let chartData = { datasets: [] }; // Initialize chartData
-    let districtID; // Declare districtID
+  // New mapping for hourly data (Precipitation)
+  const precipitationMapping = {
+    day: 24,
+    week: 168,
+    month: 720
+  };
+  
+  async function updateData() {
+    // Get temperature and wind data (10-min intervals)
+    const stationData = await fetchStationData(station);
+    allTimestamps = stationData.timestamps;
+    allTemperatures = stationData.temperatures;
+    allWinds = stationData.windSpeeds;
+    allRelativeHumidities = stationData.relativeHumidities;
+    allSoilMoisture = stationData.soilMoistures;
+    allSolarRadiation = stationData.solarRadiation;
+    allPrecipitations10min = stationData.precipitations;
+    
+    // Get precipitation data (hourly)
+    const precipData = await fetchPrecipitationData(station);
+    allPrecipTimestamps = precipData.timestamps;
+    allPrecipitations = precipData.precipitations;
 
-    async function updateChartData(currentDistrictID) {
-        if (!currentDistrictID) {
-            chartData = { datasets: [] }; // Reset chart if no districtID
-            return;
-        }
-
-        // Fetch chart data
-        let barValues = await getBarValues(currentDistrictID); // Pass districtID
-        let lineValues = await getLineValues(currentDistrictID); // Pass districtID
-        let rangeStartValues = await getRangeStartValues(currentDistrictID); // Pass districtID
-        let rangeEndValues = await getRangeEndValues(currentDistrictID); // Pass districtID
-        const dateArray = generateDatePoints('2025-01-01', 36, 10);
-
-        chartData = {
-            datasets: [
-                {
-                    type: 'bar',
-                    label: 'Bar Data',
-                    data: zipXY(dateArray, barValues),
-                    backgroundColor: 'rgba(153, 153, 153, 1)',
-                    borderColor: 'rgba(153, 153, 153, 1)',
-                    borderWidth: 1,
-                },
-                {
-                    type: 'line',
-                    label: 'Line Data',
-                    data: zipXY(dateArray, lineValues),
-                    borderColor: 'rgba(0, 100, 0, 1)',
-                    borderWidth: 2,
-                    fill: false,
-                    tension: 0.4,
-                },
-                {
-                    type: 'line',
-                    label: 'Range Start',
-                    data: zipXY(dateArray, rangeStartValues),
-                    borderColor: 'rgba(0, 0, 0, 0)',
-                    backgroundColor: 'rgba(0, 100, 0, 0.2)',
-                    fill: false,
-                    pointRadius: 0,
-                },
-                {
-                    type: 'line',
-                    label: 'Range End',
-                    data: zipXY(dateArray, rangeEndValues),
-                    borderColor: 'rgba(0, 0, 0, 0)',
-                    backgroundColor: 'rgba(0, 100, 0, 0.2)',
-                    fill: 2,
-                    pointRadius: 0,
-                },
-            ],
-        };
+    
+    
+    updateChartData();
+    updateWindChartData();
+    updatePrecipitationChartData();
+    updateHumidityChartData();
+    updateSoilMoistureChartData();
+    updateSolarRadiationChartData();
+  }
+  
+  function updateChartData() {
+    if (allTimestamps.length) {
+      const count = datapointsMapping[timeframe];
+      const totalPoints = allTimestamps.length;
+      const startIndex = totalPoints > count ? totalPoints - count : 0;
+      chartData = {
+        labels: allTimestamps.slice(startIndex),
+        datasets: [{
+          data: allTemperatures.slice(startIndex),
+          fill: false,
+          borderColor: 'rgba(0, 0, 0, 0.5)',
+          tension: 0.1,
+          pointHitRadius: 1000,
+          pointRadius: 0
+        }]
+      };
     }
-
-
-    $: {
-        if ($city === "Louga") {
-            districtID = 35; // Set districtID for Louga
-        } else if ($city === "Linguere") {
-            districtID = 36; // Set districtID for Linguere
-        } else {
-            districtID = undefined; // Or set to a default value if no city is selected
-        }
-         console.log("District ID updated:", districtID, "for city:", $city); // Optional: Log districtID changes
-         updateChartData(districtID); // Update chart data when districtID changes
+  }
+  
+  function updateWindChartData() {
+    if (allTimestamps.length) {
+      const count = datapointsMapping[timeframe];
+      const totalPoints = allTimestamps.length;
+      const startIndex = totalPoints > count ? totalPoints - count : 0;
+      windChartData = {
+        labels: allTimestamps.slice(startIndex),
+        datasets: [{
+          data: allWinds.slice(startIndex),
+          fill: false,
+          borderColor: 'rgba(0, 0, 0, 0.5)',
+          tension: 0.1,
+          pointHitRadius: 1000,
+          pointRadius: 0
+        }]
+      };
     }
-
-
-    onMount(async () => {
-        const url = 'https://vito-server-proxy.maxemile-meylaerts.workers.dev/mock_climate_data_10min_full.csv';
-        const response = await fetch(url);
-        const csvText = await response.text();
-        csvData = Papa.parse(csvText, { header: true,
-                                            skipEmptyLines: 'greedy',}).data;
-
-        updateVariables();
-
-        updateChartData(districtID); // Initial chart data load with default districtID (or undefined)
-
-    });
-
-    let lol = true;
-
-    let rainFall = { amount: 0, max: 0, min: 0, rainSeason: 0, days: 0, time: "" };
-    let humidity = { amount: 0, max: 0, min: 0, time: "" };
-    let temperature = { amount: 0, max: 0, min: 0, time: "" };
-    let windDirection = { amount: 0, max: 0, min: 0, time: "" };
-    let windSpeed = { amount: 0, max: 0, min: 0, time: "" };
-    let temperatureWBGT = { amount: 0, max: 0, min: 0, time: "" };
-    let baterieLevel = { amount: 0, time: "", charging: false };
-    let barrometricPressure = { amount: 0, max: 0, min: 0, time: "" };
-    let openRainFall = false;
-
-    function handleHummidtyClick(){
-        openRainFall = !openRainFall;
+  }
+  
+  function updatePrecipitationChartData() {
+    if (allPrecipTimestamps.length) {
+      const count = precipitationMapping[timeframe];
+      const totalPoints = allPrecipTimestamps.length;
+      const startIndex = totalPoints > count ? totalPoints - count : 0;
+      precipitationChartData = {
+        labels: allPrecipTimestamps.slice(startIndex),
+        datasets: [{
+          data: allPrecipitations.slice(startIndex),
+          backgroundColor: 'rgba(0, 0, 0, 0.5)'
+        }]
+      };
     }
+  }
 
-    function updateVariables() {
-        if (csvData.length > 0) {
-        const latestData = csvData[csvData.length - 1]; // Get the latest entry
-
-        rainFall = {
-            amount: latestData.TR525I20CA_Rain,
-            max: Math.max(...csvData.map(row => row.TR525I20CA_Rain)), // Calculate max rainfall
-            min: Math.min(...csvData.map(row => row.TR525I20CA_Rain)), // Calculate min rainfall
-            rainSeason: 0, // You'll need to define how to calculate this
-            days: 0, // You'll need to define how to calculate this
-            time: latestData.Timestamp
-        };
-
-        humidity = {
-            amount: latestData.EE08SS_RH,
-            max: Math.max(...csvData.map(row => row.EE08SS_RH)),
-            min: Math.min(...csvData.map(row => row.EE08SS_RH)),
-            time: latestData.Timestamp
-        };
-
-        temperature = {
-            amount: latestData.EE08SS_AirTemp,
-            max: Math.max(...csvData.map(row => row.EE08SS_AirTemp)),
-            min: Math.min(...csvData.map(row => row.EE08SS_AirTemp)),
-            time: latestData.Timestamp
-        };
-
-        windDirection = {
-            amount: latestData.WDir_Avg,
-            max: Math.max(...csvData.map(row => row.WDir_Avg)),
-            min: Math.min(...csvData.map(row => row.WDir_Avg)),
-            time: latestData.Timestamp
-        };
-
-        windSpeed = {
-            amount: latestData.Windsonic_WSpd_avg,
-            max: Math.max(...csvData.map(row => row.Windsonic_WSpd_avg)),
-            min: Math.min(...csvData.map(row => row.Windsonic_WSpd_avg)),
-            time: latestData.Timestamp
-        };
-
-        temperatureWBGT = { amount: latestData.EE08SS_WBGT,
-            max: Math.max(...csvData.map(row => row.EE08SS_WBGT)),
-            min: Math.min(...csvData.map(row => row.EE08SS_WBGT)),
-            time: latestData.Timestamp
-        };
-
-        baterieLevel = { amount: latestData.Bat_Volts,
-            time: latestData.Timestamp,
-            charging: false // Assuming charging is always false based on your previous code
-        };
-
-        barrometricPressure = { amount: latestData.PTB100_Press,
-            max: Math.max(...csvData.map(row => row.PTB100_Press)),
-            min: Math.min(...csvData.map(row => row.PTB100_Press)),
-            time: latestData.Timestamp
-        };
-        }
+  function updateHumidityChartData() {
+    if (allTimestamps.length) {
+      const count = datapointsMapping[timeframe];
+      const totalPoints = allTimestamps.length;
+      const startIndex = totalPoints > count ? totalPoints - count : 0;
+      humidityChartData = {
+        labels: allTimestamps.slice(startIndex),
+        datasets: [{
+          data: allRelativeHumidities.slice(startIndex),
+          fill: false,
+          borderColor: 'rgba(0, 0, 0, 0.5)',
+          tension: 0.1,
+          pointHitRadius: 1000,
+          pointRadius: 0
+        }]
+      };
     }
+  }
 
+  function updateSoilMoistureChartData() {
+    if (allTimestamps.length) {
+      const count = datapointsMapping[timeframe];
+      const totalPoints = allTimestamps.length;
+      const startIndex = totalPoints > count ? totalPoints - count : 0;
+      soilMoistureChartData = {
+        labels: allTimestamps.slice(startIndex),
+        datasets: [{
+          data: allSoilMoisture.slice(startIndex),
+          fill: false,
+          borderColor: 'rgba(0, 0, 0, 0.5)',
+          tension: 0.1,
+          pointHitRadius: 1000,
+          pointRadius: 0
+        }]
+      };
+    }
+  }
+
+  function updateSolarRadiationChartData() {
+    if (allTimestamps.length) {
+      const count = datapointsMapping[timeframe];
+      const totalPoints = allTimestamps.length;
+      const startIndex = totalPoints > count ? totalPoints - count : 0;
+      solarRadiationChartData = {
+        labels: allTimestamps.slice(startIndex),
+        datasets: [{
+          data: allSolarRadiation.slice(startIndex),
+          fill: false,
+          borderColor: 'rgba(0, 0, 0, 0.5)',
+          tension: 0.1,
+          pointHitRadius: 1000,
+          pointRadius: 0
+        }]
+      };
+    }
+  }
+  
+  // Auto-update chart data when timeframe changes.
+  $: updateChartData();
+  $: updateWindChartData();
+  $: updatePrecipitationChartData();
+  $: updateHumidityChartData();
+  $: updateSoilMoistureChartData();
+  $: updateSolarRadiationChartData();
+
+  
+  onMount(() => {
+    updateData();
+  });
+  
+  // Toggle state variables for chart visibility.
+  let showTemperatureChart = false;
+  let showWindChart = false;
+  let showPrecipChart = false;
+  let showHumidityChart = false;
+  let showSoilMoistureChart = false;
+  let showSolarRadiationChart = false;
+
+
+  
+  function toggleTemperature() {
+    showTemperatureChart = !showTemperatureChart;
+  }
+  
+  function toggleWind() {
+    showWindChart = !showWindChart;
+  }
+  
+  function togglePrecip() {
+    showPrecipChart = !showPrecipChart;
+  }
+
+  function toggleHum() {
+    showHumidityChart = !showHumidityChart;
+  }
+
+  function toggleSoilMoisture() {
+    showSoilMoistureChart = !showSoilMoistureChart;
+  }
+
+  function toggleSolarRadiation() {
+    showSolarRadiationChart = !showSolarRadiationChart;
+  }
+
+  function downloadCSV() {
+    // Define the CSV header
+    let csv = "Timestamp,Temperature,Precipitation,Wind Speed,Relative Humidity,Soil Moisture,Solar Radiation\n";
+
+    // Loop over the data arrays (assuming all arrays have the same length)
+    for (let i = 0; i < allTimestamps.length; i++) {
+      csv += `${allTimestamps[i]},${allTemperatures[i]},${allPrecipitations10min[i]},${allWinds[i]},${allRelativeHumidities[i]},${allSoilMoisture[i]},${allSolarRadiation[i]}\n`;
+    }
+  
+
+    // Create a Blob from the CSV string
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    
+    // Create a temporary link element and trigger a download
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "station_data.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Clean up the URL object
+    URL.revokeObjectURL(url);
+
+  }
 </script>
 
+<style>
+  .controls {
+    margin-bottom: 1rem;
+  }
+  .box {
+    margin: 5px 0;
+    background-color: #f9f9f9;
+    text-align: left;
+    width: 100%;
+    border-radius: 15px;
+    color: white;
+    padding-bottom: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  }
+  .boxTitle {
+    text-align: center;
+    padding: 10px 0;
+  }
+  .box:hover {
+    background-color: #eaeaea;
+  }
+  .content {
+    margin-top: 0px;
+    padding: 0px;
+  }
+  .latest-data {
+    font-size: 0.9rem;
+    color: #fff;
+  }
+  .mainBoxElement {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 15px 0;
+  }
+  .charts {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+ /* 3 by 2 grid layout for larger screens */
+ @media (min-width: 768px) {
+    .charts {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: auto auto;
+      gap: 1rem;
+    }
+  }
+</style>
 
-<div style="width: 100%; display: flex; flex-direction: column; justify-content: center;">
-    <div style="margin-bottom: 10px; width: 100%; display: flex; justify-content: center;">
-        <div class="dropdown">
-          <select id="city-select" bind:value={$city}>
-            <option value="" disabled selected>Select a city</option>
-            {#each cities as cityName}
-              <option value={cityName}>{cityName}</option>
-            {/each}
-          </select>
-        </div>
-    </div>
-    <div class="boxHolder">
-        {#if true}
-            <div class="box pressable" style="background-color:rgb(88, 123, 227);" on:click={() => handleHummidtyClick()}>
-                <div class="boxTitle">
-                    <h1>daily rainfall</h1>
-                </div>
-                <div class="mainBoxElement rainFallElements">
-                    <i class="fa-solid fa-droplet fa-2xl" style="padding: 10px; color: #ffffff;"></i>
-                    <h1>{rainFall.amount} /m2</h1>
-                </div>
-                <div class="timeStamp rainFallElements">
-                    <i class="fa-regular fa-clock fa-sm" style="color: #ffffff; padding: 10px"></i>
-                    <h6>{rainFall.time}</h6>
-                </div>
-                <div class="closedRainFall" class:openRainFall>
-                    <h4 style="margin-top: 5px;">start rain season: {rainFall.rainSeason} /m2</h4>
-                </div>
-                <div class="MinAndMax" style="background-color: rgb(24, 79, 244); justify-content: center;">
-                    <h4>10 days: {rainFall.days} /m2</h4>
-                </div>
-            </div>
+<div class="controls">
+  <label for="station">Select Station: </label>
+  <select id="station" bind:value={station} on:change={updateData}>
+    <option value="1">Station 1</option>
+    <option value="2">Station 2</option>
+    <option value="3">Station 3</option>
+    <option value="4">Station 4</option>
+  </select>
 
-            <div class="box" style="background-color:rgb(88, 123, 227);">
-                <div class="boxTitle">
-                    <h1>humidity</h1>
-                </div>
-                <div class="mainBoxElement">
-                    <i class="fa-solid fa-water fa-2xl" style="padding: 10px; color: #ffffff;"></i>
-                    <h1>{humidity.amount} %</h1>
-                </div>
-                <div class="timeStamp">
-                    <i class="fa-regular fa-clock fa-sm" style="color: #ffffff; padding: 10px"></i>
-                    <h6>{humidity.time}</h6>
-                </div>
-                <div class="MinAndMax" style="background-color: rgb(24, 79, 244);">
-                    <h4>Min: {humidity.min}%</h4>
-                    <h4>Max: {humidity.max}%</h4>
-                </div>
-            </div>
+  <label for="timeframe">Select Timeframe: </label>
+  <select id="timeframe" bind:value={timeframe} on:change={updateData}>
+    <option value="month">Past Month</option>
+    <option value="week">Past Week</option>
+    <option value="day">Past Day</option>
+  </select>
 
-            <div class="box" style="background-color: #cc5d51;">
-                <div class="boxTitle">
-                    <h1>temperature</h1>
-                </div>
-                <div class="mainBoxElement">
-                    <i class="fa-solid fa-temperature-half fa-2xl" style="padding: 10px; color: #ffffff;"></i>
-                    <h1>{temperature.amount} °C</h1>
-                </div>
-                <div class="timeStamp">
-                    <i class="fa-regular fa-clock fa-sm" style="color: #ffffff; padding: 10px"></i>
-                    <h6>{temperature.time}</h6>
-                </div>
-                <div class="MinAndMax" style="background-color: #b91200;">
-                    <h4>Min: {temperature.min} °C</h4>
-                    <h4>Max: {temperature.max} °C</h4>
-                </div>
-            </div>
+  <!-- New CSV download button -->
+  <button on:click={downloadCSV}>Download CSV</button>
 
-            <div class="box" style="background-color: #b551cc;">
-                <div class="boxTitle">
-                    <h1>temp. WBT</h1>
-                </div>
-                <div class="mainBoxElement">
-                    <i class="fa-solid fa-sun fa-2xl" style="color: #ffffff; padding: 10px"></i>
-                    <h1>{temperatureWBGT.amount} °C</h1>
-                </div>
-                <div class="timeStamp">
-                    <i class="fa-regular fa-clock fa-sm" style="color: #ffffff; padding: 10px"></i>
-                    <h6>{temperatureWBGT.time}</h6>
-                </div>
-                <div class="MinAndMax" style="background-color: #b900b0;">
-                    <h4>Min: {temperatureWBGT.min} °C</h4>
-                    <h4>Max: {temperatureWBGT.max} °C</h4>
-                </div>
-            </div>
-
-            <div class="box" style="background-color: #ccb551;">
-                <div class="boxTitle">
-                    <h1>wind direction</h1>
-                </div>
-                <div class="mainBoxElement">
-                    <i class="fa-solid fa-compass fa-2xl" style=" padding:10px; color: #ffffff;"></i>
-                    <h1>{windDirection.amount}°</h1>
-                </div>
-                <div class="timeStamp">
-                    <i class="fa-regular fa-clock fa-sm" style="color: #ffffff; padding: 10px"></i>
-                    <h6>{windDirection.time}</h6>
-                </div>
-                <div class="MinAndMax" style="background-color: #b99d00;">
-                    <h4>Min: {windDirection.min}°</h4>
-                    <h4>Max: {windDirection.max}°</h4>
-                </div>
-            </div>
-
-            <div class="box" style="background-color: #cc9151;">
-                <div class="boxTitle">
-                    <h1>wind</h1>
-                </div>
-                <div class="mainBoxElement">
-                    <i class="fa-solid fa-wind fa-2xl" style="color: #ffffff; padding: 10px"></i>
-                    <h1>{windSpeed.amount} km/h</h1>
-                </div>
-                <div class="timeStamp">
-                    <i class="fa-regular fa-clock fa-sm" style="color: #ffffff; padding: 10px"></i>
-                    <h6>{windSpeed.time}</h6>
-                </div>
-                <div class="MinAndMax" style="background-color: #b97200;">
-                    <h4>Min: {windSpeed.min} km/h</h4>
-                    <h4>Max: {windSpeed.max} km/h</h4>
-                </div>
-            </div>
-
-            <div class="box" style="background-color: #cc6a51;">
-                <div class="boxTitle">
-                    <h1>pressure</h1>
-                </div>
-                <div class="mainBoxElement">
-                    <i class="fa-solid fa-arrows-to-circle fa-2xl" style="padding: 10px; color: #ffffff;"></i>
-                    <h1>{barrometricPressure.amount} N/m2</h1>
-                </div>
-                <div class="timeStamp">
-                    <i class="fa-regular fa-clock fa-sm" style="color: #ffffff; padding: 10px"></i>
-                    <h6>{barrometricPressure.time}</h6>
-                </div>
-                <div class="MinAndMax" style="background-color: #b93700;">
-                    <h4>Min: {barrometricPressure.min} N/m2</h4>
-                    <h4>Max: {barrometricPressure.max} N/m2</h4>
-                </div>
-            </div>
-
-            <div class="box" style="background-color: #51ccab;">
-                <div class="boxTitle">
-                    <h1>soil mosture</h1>
-                </div>
-                <div class="mainBoxElement">
-                    <i class="fa-solid fa-arrow-up-from-water-pump fa-2xl" style="padding: 10px; color: #ffffff;"></i>
-                    <h1>{baterieLevel.amount}%</h1>
-                </div>
-                <div class="timeStamp">
-                    <i class="fa-regular fa-clock fa-sm" style="color: #ffffff; padding: 10px"></i>
-                    <h6>{baterieLevel.time}</h6>
-                </div>
-                <div class="MinAndMax" style="background-color: #00b98b;">
-                    <h4>Min: {windSpeed.min} %</h4>
-                    <h4>Max: {windSpeed.max} %</h4>
-                </div>
-            </div>
-
-            <div class="box" style="background-color: #51cc55;">
-                <div class="boxTitle">
-                    <h1>battery level</h1>
-                </div>
-                <div class="mainBoxElement">
-                    {#if baterieLevel.charging}
-                        <i class="fa-solid fa-bolt fa-2xl" style="padding: 10px; color: #ffffff;"></i>
-                    {:else if baterieLevel.amount > 50}
-                        <i class="fa-solid fa-battery-full fa-2xl fa-rotate-270" style=" padding:10px; color: #ffffff;"></i>
-                    {:else if baterieLevel.amount > 20}
-                        <i class="fa-solid fa-battery-half fa-2xl fa-rotate-270" style=" padding:10px; color: #ffffff;"></i>
-                    {:else}
-                        <i class="fa-solid fa-battery-empty fa-2xl fa-rotate-270" style=" padding:10px; color: #ffffff;"></i>
-                    {/if}
-                    <h1>{baterieLevel.amount}%</h1>
-                </div>
-                <div class="timeStamp">
-                    <i class="fa-regular fa-clock fa-sm" style="color: #ffffff; padding: 10px"></i>
-                    <h6>{baterieLevel.time}</h6>
-                </div>
-                <div class="MinAndMax" style="justify-content: center !important; background-color: #0cb900;;">
-                    {#if baterieLevel.charging}
-                        <h4>charging</h4>
-                        <div class="loader"></div>
-                    {:else}
-                        <h4>battery not charging</h4>
-                    {/if}
-                </div>
-            </div>
-        {:else}
-            <div style="display: flex; flex-direction: column;">
-                <h1>no city selected</h1>
-                <h3 style="color: gray;">select one in the side bar</h3>
-            </div>
-        {/if}
-    </div>
-
-    <div class="chart-container">
-        {#if chartData.datasets.length > 0}
-            <PrecipitationChart {chartData} />
-        {:else}
-            <p>Loading chart data...</p>
-        {/if}
-    </div>
 </div>
 
-<style>
-    .chart-container {
-        width: 100%;
-        max-width: 800px;
-        height: 400px; /* ensure the container has a definite height */
-        margin: 20px auto;
-    }
+<div class="charts">
+<!-- Temperature Chart Box -->
+<button class="box" style="background-color:rgb(204, 93, 81);" on:click={toggleTemperature} aria-expanded={showTemperatureChart}>
+    <div class="boxTitle">
+      <h1>Temperature</h1>
+    </div>
+    <div class="mainBoxElement">
+      <i class="fa-solid fa-temperature-half fa-2xl" style="padding: 10px; color: #ffffff;"></i>
+      <h1 class="latest-data">{latestTemperature} °C</h1>
+    </div>
+    {#if showTemperatureChart}
+      <div 
+          class="content" 
+          role="button"
+          tabindex="0" 
+          on:click|stopPropagation
+          on:keydown={(event) => { if (event.key === "Enter" || event.key === " ") event.stopPropagation(); }}
+      >
+        <TemperatureChart data={chartData} {timeframe} />
+      </div>
+    {/if}
+  </button>
+      
+  <!-- Precipitation Chart Box -->
+  <button class="box" style="background-color:rgb(54, 162, 235);" on:click={togglePrecip} aria-expanded={showPrecipChart}>
+    <div class="boxTitle">
+      <h1>Precipitation</h1>
+    </div>
+    <div class="mainBoxElement">
+      <i class="fa-solid fa-cloud-showers-heavy fa-2xl" style="padding: 10px; color: #ffffff;"></i>
+      <h1 class="latest-data">{latestPrecipitation} mm</h1>
+    </div>
+    {#if showPrecipChart}
+      <div 
+        class="content" 
+        role="button"
+        tabindex="0" 
+        on:click|stopPropagation
+        on:keydown={(event) => { if (event.key === "Enter" || event.key === " ") event.stopPropagation(); }}
+      >  
+        <PrecipitationChart data={precipitationChartData} {timeframe} />
+      </div>
+    {/if}
+  </button>  
 
-    .boxHolder{
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Responsive grid */
-        gap: 20px;
-        width: 100%;
-        max-width: 1000px;
-        margin: 0 auto; /* Center the grid */
-        margin-bottom: 20px; /* Add some space below the boxes */
-    }
-    .box {
-        display: flex;
-        flex-direction: column;
-        border-radius: 15px;
-        color: white;
-        padding-bottom: 10px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* subtle shadow for depth */
-    }
+  <!-- Soil Moisture Chart Box -->
+  <button class="box" style="background-color:rgb(46,204,113);" on:click={toggleSoilMoisture} aria-expanded={showSoilMoistureChart}>
+    <div class="boxTitle">
+      <h1>Soil Moisture</h1>
+    </div>
+    <div class="mainBoxElement">
+      <i class="fa-solid fa-seedling fa-2xl" style="padding: 10px; color: #ffffff;"></i>
+      <h1 class="latest-data">{latestSoilMoisture} m<sup>3</sup>/m<sup>3</sup></h1>
+    </div>
+    {#if showSoilMoistureChart}
+      <div 
+        class="content" 
+        role="button"
+        tabindex="0" 
+        on:click|stopPropagation
+        on:keydown={(event) => { if (event.key === "Enter" || event.key === " ") event.stopPropagation(); }}
+      >
+        <SoilMoistureChart data={soilMoistureChartData} {timeframe} />
+      </div>
+    {/if}
+  </button>
 
-    .boxTitle {
-        text-align: center;
-        padding: 10px 0;
-    }
+  <!-- Wind Speed Chart Box -->
+  <button class="box" style="background-color: #5486b6;" on:click={toggleWind} aria-expanded={showWindChart}>
+    <div class="boxTitle">
+      <h1>Wind Speed</h1>
+    </div>
+    <div class="mainBoxElement">
+      <i class="fa-solid fa-wind fa-2xl" style="padding: 10px; color: #ffffff;"></i>
+      <h1 class="latest-data">{latestWind} m/s</h1>
+    </div>    
+    {#if showWindChart} 
+      <div 
+        class="content" 
+        role="button"
+        tabindex="0" 
+        on:click|stopPropagation
+        on:keydown={(event) => { if (event.key === "Enter" || event.key === " ") event.stopPropagation(); }}
+      >  
+        <WindSpeedChart data={windChartData} {timeframe} />
+      </div>
+    {/if}
+  </button>
 
-    .mainBoxElement {
-        display: flex;
-        align-items: center; /* Vertically center items */
-        justify-content: center; /* Horizontally center items */
-        padding: 15px 0;
-    }
 
-    .mainBoxElement h1 {
-        margin-left: 10px; /* Space between icon and text */
-    }
+    <!-- Relative Humidity Chart Box -->
+  <button class="box" style="background-color:rgb(255, 159, 64);" on:click={toggleHum} aria-expanded={showHumidityChart}>
+    <div class="boxTitle">
+      <h1>Relative Humidity</h1>
+    </div>
+    <div class="mainBoxElement">
+      <i class="fa-solid fa-tint fa-2xl" style="padding: 10px; color: #ffffff;"></i>
+      <h1 class="latest-data">{latestHumidity} %</h1>
+    </div>
+    {#if showHumidityChart}
+      <div 
+      class="content" 
+      role="button"
+      tabindex="0" 
+      on:click|stopPropagation
+      on:keydown={(event) => { if (event.key === "Enter" || event.key === " ") event.stopPropagation(); }}
+    >          
+      <RelativeHumidityChart data={humidityChartData} {timeframe} />
+    </div>
+    {/if}
+  </button>
 
-    .timeStamp {
-        display: flex;
-        align-items: center;
-        justify-content: flex-start; /* Align time to the start */
-        padding: 5px 15px;
-        color: #eee; /* Lighter text for timestamp */
-    }
 
-    .timeStamp h6 {
-        margin-left: 5px;
-        font-weight: normal; /* Less bold for timestamp */
-    }
+<!-- Solar Radiation Chart Box -->
+<button class="box" style="background-color:rgb(255,205,86);" on:click={toggleSolarRadiation} aria-expanded={showSolarRadiationChart}>
+  <div class="boxTitle">
+    <h1>Solar Radiation</h1>
+  </div>
+  <div class="mainBoxElement">
+    <i class="fa-solid fa-sun fa-2xl" style="padding: 10px; color: #ffffff;"></i>
+    <h1 class="latest-data">{latestSolarRadiation} W/m<sup>2</sup></h1>
+  </div>
+  {#if showSolarRadiationChart}
+<div 
+      class="content" 
+      role="button"
+      tabindex="0" 
+      on:click|stopPropagation
+      on:keydown={(event) => { if (event.key === "Enter" || event.key === " ") event.stopPropagation(); }}
+    >      <SolarRadiationChart data={solarRadiationChartData} {timeframe} />
+    </div>
+  {/if}
+</button>
 
-    .MinAndMax {
-        display: flex;
-        justify-content: space-around;
-        padding: 10px 0;
-        border-radius: 0 0 15px 15px;
-    }
 
-    .MinAndMax h4 {
-        font-weight: bold;
-        color: white;
-    }
-
-    .closedRainFall{
-        overflow: hidden;
-        max-height: 0px;
-        transition: max-height 0.5s ease-in-out;
-        color: white;
-        text-align: center;
-    }
-
-    .closedRainFall.openRainFall{
-        max-height: 200px; /* adjust as needed */
-    }
-
-    /* Loader Styling */
-    .loader {
-        border: 4px solid #f3f3f3; /* Light grey */
-        border-top: 4px solid #3498db; /* Blue */
-        border-radius: 50%;
-        width: 20px;
-        height: 20px;
-        animation: spin 2s linear infinite;
-        margin-left: 5px;
-    }
-
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
-
-    .pressable{
-        cursor: pointer;
-    }
-</style>
+</div>

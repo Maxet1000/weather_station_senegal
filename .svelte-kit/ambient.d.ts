@@ -27,7 +27,9 @@
  */
 declare module '$env/static/private' {
 	export const ALLUSERSPROFILE: string;
+	export const ANDROID_SDK_HOME: string;
 	export const APPDATA: string;
+	export const Ccomp: string;
 	export const ChocolateyInstall: string;
 	export const ChocolateyLastPathUpdate: string;
 	export const CHROME_CRASHPAD_PIPE_NAME: string;
@@ -39,17 +41,24 @@ declare module '$env/static/private' {
 	export const ComSpec: string;
 	export const DriverData: string;
 	export const EDITOR: string;
-	export const EFC_9648: string;
+	export const EFC_9624: string;
 	export const FPS_BROWSER_APP_PROFILE_STRING: string;
 	export const FPS_BROWSER_USER_PROFILE_STRING: string;
 	export const GIT_ASKPASS: string;
+	export const GSTREAMER_1_0_ROOT_X86_64: string;
 	export const HOME: string;
 	export const HOMEDRIVE: string;
 	export const HOMEPATH: string;
+	export const IFX_TOOLBOX_UUID: string;
 	export const INIT_CWD: string;
+	export const IVIROOTDIR32: string;
+	export const IVIROOTDIR64: string;
+	export const java_home: string;
 	export const LANG: string;
 	export const LOCALAPPDATA: string;
 	export const LOGONSERVER: string;
+	export const MinGW: string;
+	export const MOSQUITTO_DIR: string;
 	export const NODE: string;
 	export const NODE_ENV: string;
 	export const npm_command: string;
@@ -89,6 +98,7 @@ declare module '$env/static/private' {
 	export const PROMPT: string;
 	export const PSModulePath: string;
 	export const PUBLIC: string;
+	export const PVIEW_KEYSHOT7_HOME: string;
 	export const SESSIONNAME: string;
 	export const SystemDrive: string;
 	export const SystemRoot: string;
@@ -105,6 +115,8 @@ declare module '$env/static/private' {
 	export const VSCODE_GIT_ASKPASS_NODE: string;
 	export const VSCODE_GIT_IPC_HANDLE: string;
 	export const VSCODE_INJECTION: string;
+	export const VXIPNPPATH: string;
+	export const VXIPNPPATH64: string;
 	export const windir: string;
 }
 
@@ -138,7 +150,9 @@ declare module '$env/static/public' {
 declare module '$env/dynamic/private' {
 	export const env: {
 		ALLUSERSPROFILE: string;
+		ANDROID_SDK_HOME: string;
 		APPDATA: string;
+		Ccomp: string;
 		ChocolateyInstall: string;
 		ChocolateyLastPathUpdate: string;
 		CHROME_CRASHPAD_PIPE_NAME: string;
@@ -150,17 +164,24 @@ declare module '$env/dynamic/private' {
 		ComSpec: string;
 		DriverData: string;
 		EDITOR: string;
-		EFC_9648: string;
+		EFC_9624: string;
 		FPS_BROWSER_APP_PROFILE_STRING: string;
 		FPS_BROWSER_USER_PROFILE_STRING: string;
 		GIT_ASKPASS: string;
+		GSTREAMER_1_0_ROOT_X86_64: string;
 		HOME: string;
 		HOMEDRIVE: string;
 		HOMEPATH: string;
+		IFX_TOOLBOX_UUID: string;
 		INIT_CWD: string;
+		IVIROOTDIR32: string;
+		IVIROOTDIR64: string;
+		java_home: string;
 		LANG: string;
 		LOCALAPPDATA: string;
 		LOGONSERVER: string;
+		MinGW: string;
+		MOSQUITTO_DIR: string;
 		NODE: string;
 		NODE_ENV: string;
 		npm_command: string;
@@ -200,6 +221,7 @@ declare module '$env/dynamic/private' {
 		PROMPT: string;
 		PSModulePath: string;
 		PUBLIC: string;
+		PVIEW_KEYSHOT7_HOME: string;
 		SESSIONNAME: string;
 		SystemDrive: string;
 		SystemRoot: string;
@@ -216,6 +238,8 @@ declare module '$env/dynamic/private' {
 		VSCODE_GIT_ASKPASS_NODE: string;
 		VSCODE_GIT_IPC_HANDLE: string;
 		VSCODE_INJECTION: string;
+		VXIPNPPATH: string;
+		VXIPNPPATH64: string;
 		windir: string;
 		[key: `PUBLIC_${string}`]: undefined;
 		[key: `${string}`]: string | undefined;
