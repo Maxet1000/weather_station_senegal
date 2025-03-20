@@ -15,7 +15,7 @@
   import {storedStation} from '$lib/stores/locationStore.js';
 
   
-  let station = '';
+  let station = '1';
   let timeframe = 'week';
   
   // Temperature & wind data arrays from 10-min data.
