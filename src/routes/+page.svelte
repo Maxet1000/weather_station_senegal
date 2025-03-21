@@ -296,8 +296,8 @@
     width: 100%;
     border-radius: 15px;
     color: white;
-    padding-bottom: 10px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border:none;
   }
   .boxTitle {
     text-align: center;
@@ -311,14 +311,29 @@
     padding: 0px;
   }
   .latest-data {
-    font-size: 0.9rem;
+    font-size: 2.5rem;
     color: #fff;
   }
   .mainBoxElement {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 15px 0;
+    padding-top: 5px;
+    padding-bottom: 20px;
+  }
+  .toggleLabel {
+    align-self: flex-end; /* aligns label to the left */
+    font-size: 0.9rem;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    margin-left: 25px;
+    margin-top: 10px;
+    margin-bottom: 25px;
+  }
+
+  .toggleLabel i {
+    margin-right: 10px;
   }
   .charts {
     display: flex;
@@ -334,6 +349,7 @@
       gap: 1rem;
     }
   }
+
 </style>
 
 <div class="controls">
@@ -364,7 +380,7 @@
       <h1>Température</h1>
     </div>
     <div class="mainBoxElement">
-      <i class="fa-solid fa-temperature-half fa-2xl" style="padding: 10px; color: #ffffff;"></i>
+      <i class="fa-solid fa-temperature-half fa-2xl" style="padding: 10px; font-size: 40px; color: #ffffff;"></i>
       <h1 class="latest-data">{latestTemperature} °C</h1>
     </div>
     {#if showTemperatureChart}
@@ -378,6 +394,11 @@
         <TemperatureChart data={chartData} {timeframe} />
       </div>
     {/if}
+    <!-- Toggle label always visible in the lower left corner -->
+    <div class="toggleLabel">
+      <i class="fa-solid {showTemperatureChart ? 'fa-chevron-up' : 'fa-chevron-down'}"></i>
+      {showTemperatureChart ? 'Afficher Moins' : 'Afficher Graphique'}
+    </div>
   </button>
       
   <!-- Precipitation Chart Box -->
@@ -386,7 +407,7 @@
       <h1>Précipitation</h1>
     </div>
     <div class="mainBoxElement">
-      <i class="fa-solid fa-cloud-showers-heavy fa-2xl" style="padding: 10px; color: #ffffff;"></i>
+      <i class="fa-solid fa-cloud-showers-heavy fa-2xl" style="padding: 10px; padding-right: 10px; font-size: 40px; color: #ffffff;"></i>
       <h1 class="latest-data">{latestPrecipitation} mm</h1>
     </div>
     {#if showPrecipChart}
@@ -400,6 +421,10 @@
         <PrecipitationChart data={precipitationChartData} {timeframe} />
       </div>
     {/if}
+    <div class="toggleLabel">
+      <i class="fa-solid {showPrecipChart ? 'fa-chevron-up' : 'fa-chevron-down'}"></i>
+      {showPrecipChart ? 'Afficher Moins' : 'Afficher Graphique'}
+    </div>
   </button>  
 
   <!-- Soil Moisture Chart Box -->
@@ -408,7 +433,7 @@
       <h1>Humidité du Sol</h1>
     </div>
     <div class="mainBoxElement">
-      <i class="fa-solid fa-seedling fa-2xl" style="padding: 10px; color: #ffffff;"></i>
+      <i class="fa-solid fa-seedling fa-2xl" style="padding: 10px; font-size: 40px; color: #ffffff;"></i>
       <h1 class="latest-data">{latestSoilMoisture} m<sup>3</sup>/m<sup>3</sup></h1>
     </div>
     {#if showSoilMoistureChart}
@@ -422,6 +447,10 @@
         <SoilMoistureChart data={soilMoistureChartData} {timeframe} />
       </div>
     {/if}
+    <div class="toggleLabel">
+      <i class="fa-solid {showSoilMoistureChart ? 'fa-chevron-up' : 'fa-chevron-down'}"></i>
+      {showSoilMoistureChart ? 'Afficher Moins' : 'Afficher Graphique'}
+    </div>
   </button>
 
   <!-- Wind Speed Chart Box -->
@@ -430,7 +459,7 @@
       <h1>Vitesse du Vent</h1>
     </div>
     <div class="mainBoxElement">
-      <i class="fa-solid fa-wind fa-2xl" style="padding: 10px; color: #ffffff;"></i>
+      <i class="fa-solid fa-wind fa-2xl" style="padding: 10px; font-size: 40px; color: #ffffff;"></i>
       <h1 class="latest-data">{latestWind} m/s</h1>
     </div>    
     {#if showWindChart} 
@@ -444,6 +473,10 @@
         <WindSpeedChart data={windChartData} {timeframe} />
       </div>
     {/if}
+    <div class="toggleLabel">
+      <i class="fa-solid {showWindChart ? 'fa-chevron-up' : 'fa-chevron-down'}"></i>
+      {showWindChart ? 'Afficher Moins' : 'Afficher Graphique'}
+    </div>
   </button>
 
 
@@ -453,7 +486,7 @@
       <h1>Humidité Relative</h1>
     </div>
     <div class="mainBoxElement">
-      <i class="fa-solid fa-tint fa-2xl" style="padding: 10px; color: #ffffff;"></i>
+      <i class="fa-solid fa-tint fa-2xl" style="padding: 10px; font-size: 40px; color: #ffffff;"></i>
       <h1 class="latest-data">{latestHumidity} %</h1>
     </div>
     {#if showHumidityChart}
@@ -467,6 +500,10 @@
       <RelativeHumidityChart data={humidityChartData} {timeframe} />
     </div>
     {/if}
+    <div class="toggleLabel">
+      <i class="fa-solid {showHumidityChart ? 'fa-chevron-up' : 'fa-chevron-down'}"></i>
+      {showHumidityChart ? 'Afficher Moins' : 'Afficher Graphique'}
+    </div>
   </button>
 
 
@@ -476,7 +513,7 @@
     <h1>Rayonnement Solaire</h1>
   </div>
   <div class="mainBoxElement">
-    <i class="fa-solid fa-sun fa-2xl" style="padding: 10px; color: #ffffff;"></i>
+    <i class="fa-solid fa-sun fa-2xl" style="padding: 10px; font-size: 40px; color: #ffffff;"></i>
     <h1 class="latest-data">{latestSolarRadiation} W/m<sup>2</sup></h1>
   </div>
   {#if showSolarRadiationChart}
@@ -489,6 +526,10 @@
     >      <SolarRadiationChart data={solarRadiationChartData} {timeframe} />
     </div>
   {/if}
+  <div class="toggleLabel">
+    <i class="fa-solid {showSolarRadiationChart ? 'fa-chevron-up' : 'fa-chevron-down'}"></i>
+    {showSolarRadiationChart ? 'Afficher Moins' : 'Afficher Graphique'}
+  </div>
 </button>
 
 
