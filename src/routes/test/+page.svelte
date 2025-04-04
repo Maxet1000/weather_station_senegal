@@ -8,6 +8,11 @@
   import SoilMoistureChart from '$lib/components/SoilMoistureChart.svelte';
   import SolarRadiationChart from '$lib/components/SolarRadiationChart.svelte';
   import { fetchStationData, fetchPrecipitationData } from '$lib/dataService.js';
+
+  import PredictedPrecipChart from '$lib/components/PredictedPrecipChart.svelte';
+  import { getBarValues, getLineValues, getRangeStartValues, getRangeEndValues, generateDecadeDates, zipXY } from '$lib/chart-data.js';
+  import Papa from 'papaparse';
+
   
   import "../page.css";
   import '@fortawesome/fontawesome-free/css/all.min.css'
@@ -38,6 +43,9 @@
   let humidityChartData = { labels: [], datasets: [] };
   let soilMoistureChartData = { labels: [], datasets: [] }; // new for soil moisture
   let solarRadiationChartData = { labels: [], datasets: [] }; // new chart data
+
+  let predictionChartData = { datasets: [] }; // Initialize chartData
+
 
   // Reactive latest values.
   $: latestTemperature = allTemperatures.length ? allTemperatures[allTemperatures.length - 1] : 'N/A';
@@ -198,6 +206,7 @@
     }
   }
   
+
   // Auto-update chart data when timeframe changes.
   $: updateChartData();
   $: updateWindChartData();
@@ -207,7 +216,7 @@
   $: updateSolarRadiationChartData();
 
   
-  onMount(() => {
+  onMount(async () => {
     storedStation.subscribe(val => {
       // Only update if there's a value from the store.
       if (val) {
@@ -215,6 +224,53 @@
       }
     });
     updateData();
+
+    // Fetch chart data
+    let barValues = await getBarValues(1);
+        let lineValues = await getLineValues(1);
+        let rangeStartValues = await getRangeStartValues(1);
+        let rangeEndValues = await getRangeEndValues(1);
+        const dateArray = generateDecadeDates('2025-01-01', 36); // 36 decades
+        console.log(dateArray);
+        predictionChartData = {
+            datasets: [
+                {
+                    type: 'bar',
+                    label: 'Bar Data',
+                    data: zipXY(dateArray, barValues),
+                    backgroundColor: 'rgba(153, 153, 153, 1)',
+                    borderColor: 'rgba(153, 153, 153, 1)',
+                    borderWidth: 1,
+                },
+                {
+                    type: 'line',
+                    label: 'Line Data',
+                    data: zipXY(dateArray, lineValues),
+                    borderColor: 'rgba(0, 100, 0, 1)',
+                    borderWidth: 2,
+                    fill: false,
+                    tension: 0.4,
+                },
+                {
+                    type: 'line',
+                    label: 'Range Start',
+                    data: zipXY(dateArray, rangeStartValues),
+                    borderColor: 'rgba(0, 0, 0, 0)',
+                    backgroundColor: 'rgba(0, 100, 0, 0.2)',
+                    fill: false,
+                    pointRadius: 0,
+                },
+                {
+                    type: 'line',
+                    label: 'Range End',
+                    data: zipXY(dateArray, rangeEndValues),
+                    borderColor: 'rgba(0, 0, 0, 0)',
+                    backgroundColor: 'rgba(0, 100, 0, 0.2)',
+                    fill: 2,
+                    pointRadius: 0,
+                },
+            ],
+        };
   });
 
   function handleStationChange(event) {
@@ -530,5 +586,14 @@
   </div>
 </button>
 
-
 </div>
+
+<div class="chart-container">
+  {#if predictionChartData.datasets.length > 0}
+      <PredictedPrecipChart chartData={predictionChartData} />
+  {:else}
+      <p>Loading chart data...</p>
+  {/if}
+</div>
+
+

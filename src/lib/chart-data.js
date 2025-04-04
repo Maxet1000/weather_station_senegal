@@ -2,10 +2,11 @@
 // src/routes/chart-data.js
 
 import Papa from 'papaparse';
+  
 
 export async function getBarValues(districtId) {
     const baseUrl =
-        'https://vito-server-proxy.maxemile-meylaerts.workers.dev/seasonal_forecasts/precipitation_reference_decade-';
+        'https://vito-server-proxy.maxemile-meylaerts.workers.dev/Previsions/reference/precipitation_reference_decade-';
     const suffix = '_median_2006.csv';
 
     // Create an array of promises, one for each CSV (from 00 to 35)
@@ -43,7 +44,7 @@ export async function getBarValues(districtId) {
 
 export async function getLineValues(districtId) {
     const baseUrl =
-        'https://vito-server-proxy.maxemile-meylaerts.workers.dev/seasonal_forecasts/precipitation_seasonal-ecmwf-fc-start-month-01_decade-';
+        'https://vito-server-proxy.maxemile-meylaerts.workers.dev/Previsions/fc-start-month-03_2025/precipitation_seasonal-ecmwf-fc-start-month-03_decade-';
     const suffix = '_median_2025.csv';
     const lineValues = new Array(36).fill(null); // Initialize with null values
 
@@ -81,7 +82,7 @@ export async function getLineValues(districtId) {
 
 export async function getRangeStartValues(districtId) {
     const baseUrl =
-        'https://vito-server-proxy.maxemile-meylaerts.workers.dev/seasonal_forecasts/precipitation_seasonal-ecmwf-fc-start-month-01_decade-';
+        'https://vito-server-proxy.maxemile-meylaerts.workers.dev/Previsions/fc-start-month-03_2025/precipitation_seasonal-ecmwf-fc-start-month-03_decade-';
     const suffix = '_q10_2025.csv';
     const rangeStartValues = new Array(36).fill(null); // Initialize with null values
 
@@ -119,7 +120,7 @@ export async function getRangeStartValues(districtId) {
 
 export async function getRangeEndValues(districtId) {
     const baseUrl =
-        'https://vito-server-proxy.maxemile-meylaerts.workers.dev/seasonal_forecasts/precipitation_seasonal-ecmwf-fc-start-month-01_decade-';
+        'https://vito-server-proxy.maxemile-meylaerts.workers.dev/Previsions/fc-start-month-03_2025/precipitation_seasonal-ecmwf-fc-start-month-03_decade-';
     const suffix = '_q90_2025.csv';
     const rangeEndValues = new Array(36).fill(null); // Initialize with null values
 
@@ -169,6 +170,31 @@ export function generateDatePoints(startDateString, count, intervalDays) {
     return points;
 }
 
+export function generateDecadeDates(startDateStr, count) {
+    const result = [];
+    const startDate = new Date(startDateStr);
+    let currentMonth = startDate.getMonth();
+    let currentYear = startDate.getFullYear();
+  
+    while (result.length < count) {
+      // Fixed days for each month.
+      const days = [1, 11, 21];
+      for (const d of days) {
+        const date = new Date(currentYear, currentMonth, d);
+        // Only add dates that are on or after the start date.
+        if (date >= startDate && result.length < count) {
+          result.push(date);
+        }
+      }
+      // Move to the next month.
+      currentMonth++;
+      if (currentMonth > 11) {
+        currentMonth = 0;
+        currentYear++;
+      }
+    }
+    return result;
+  }
 
 // Convert each Y-value into an object { x: date, y: value }:
 export function zipXY(dates, values) {

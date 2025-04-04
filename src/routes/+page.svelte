@@ -8,6 +8,11 @@
   import SoilMoistureChart from '$lib/components/SoilMoistureChart.svelte';
   import SolarRadiationChart from '$lib/components/SolarRadiationChart.svelte';
   import { fetchStationData, fetchPrecipitationData } from '$lib/dataService.js';
+
+  import PredictedPrecipChart from '$lib/components/PredictedPrecipChart.svelte';
+  import { getBarValues, getLineValues, getRangeStartValues, getRangeEndValues, generateDecadeDates, zipXY } from '$lib/chart-data.js';
+  import Papa from 'papaparse';
+
   
   import "./page.css";
   import '@fortawesome/fontawesome-free/css/all.min.css'
@@ -38,6 +43,9 @@
   let humidityChartData = { labels: [], datasets: [] };
   let soilMoistureChartData = { labels: [], datasets: [] }; // new for soil moisture
   let solarRadiationChartData = { labels: [], datasets: [] }; // new chart data
+
+  let predictionChartData = { datasets: [] }; // Initialize chartData
+
 
   // Reactive latest values.
   $: latestTemperature = allTemperatures.length ? allTemperatures[allTemperatures.length - 1] : 'N/A';
@@ -198,6 +206,7 @@
     }
   }
   
+
   // Auto-update chart data when timeframe changes.
   $: updateChartData();
   $: updateWindChartData();
@@ -207,7 +216,7 @@
   $: updateSolarRadiationChartData();
 
   
-  onMount(() => {
+  onMount(async () => {
     storedStation.subscribe(val => {
       // Only update if there's a value from the store.
       if (val) {
@@ -215,6 +224,53 @@
       }
     });
     updateData();
+
+    // Fetch chart data
+    let barValues = await getBarValues(1);
+        let lineValues = await getLineValues(1);
+        let rangeStartValues = await getRangeStartValues(1);
+        let rangeEndValues = await getRangeEndValues(1);
+        const dateArray = generateDecadeDates('2025-01-01', 36); // 36 decades
+        console.log(dateArray);
+        predictionChartData = {
+            datasets: [
+                {
+                    type: 'bar',
+                    label: 'Bar Data',
+                    data: zipXY(dateArray, barValues),
+                    backgroundColor: 'rgba(153, 153, 153, 1)',
+                    borderColor: 'rgba(153, 153, 153, 1)',
+                    borderWidth: 1,
+                },
+                {
+                    type: 'line',
+                    label: 'Line Data',
+                    data: zipXY(dateArray, lineValues),
+                    borderColor: 'rgba(0, 100, 0, 1)',
+                    borderWidth: 2,
+                    fill: false,
+                    tension: 0.4,
+                },
+                {
+                    type: 'line',
+                    label: 'Range Start',
+                    data: zipXY(dateArray, rangeStartValues),
+                    borderColor: 'rgba(0, 0, 0, 0)',
+                    backgroundColor: 'rgba(0, 100, 0, 0.2)',
+                    fill: false,
+                    pointRadius: 0,
+                },
+                {
+                    type: 'line',
+                    label: 'Range End',
+                    data: zipXY(dateArray, rangeEndValues),
+                    borderColor: 'rgba(0, 0, 0, 0)',
+                    backgroundColor: 'rgba(0, 100, 0, 0.2)',
+                    fill: 2,
+                    pointRadius: 0,
+                },
+            ],
+        };
   });
 
   function handleStationChange(event) {
@@ -296,8 +352,8 @@
     width: 100%;
     border-radius: 15px;
     color: white;
+    padding-bottom: 20px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    border:none;
   }
   .boxTitle {
     text-align: center;
@@ -311,25 +367,23 @@
     padding: 0px;
   }
   .latest-data {
-    font-size: 2.5rem;
+    font-size: 1.8rem;
     color: #fff;
   }
   .mainBoxElement {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding-top: 5px;
-    padding-bottom: 20px;
+    padding: 15px 0;
   }
   .toggleLabel {
-    align-self: flex-end; /* aligns label to the left */
+    align-self: flex-start; /* aligns label to the left */
     font-size: 0.9rem;
     color: #fff;
     display: flex;
     align-items: center;
-    margin-left: 25px;
+    margin-left: 10px;
     margin-top: 10px;
-    margin-bottom: 25px;
   }
 
   .toggleLabel i {
@@ -380,7 +434,7 @@
       <h1>Température</h1>
     </div>
     <div class="mainBoxElement">
-      <i class="fa-solid fa-temperature-half fa-2xl" style="padding: 10px; font-size: 40px; color: #ffffff;"></i>
+      <i class="fa-solid fa-temperature-half fa-2xl" style="padding: 10px; color: #ffffff;"></i>
       <h1 class="latest-data">{latestTemperature} °C</h1>
     </div>
     {#if showTemperatureChart}
@@ -407,7 +461,7 @@
       <h1>Précipitation</h1>
     </div>
     <div class="mainBoxElement">
-      <i class="fa-solid fa-cloud-showers-heavy fa-2xl" style="padding: 10px; padding-right: 10px; font-size: 40px; color: #ffffff;"></i>
+      <i class="fa-solid fa-cloud-showers-heavy fa-2xl" style="padding: 10px; color: #ffffff;"></i>
       <h1 class="latest-data">{latestPrecipitation} mm</h1>
     </div>
     {#if showPrecipChart}
@@ -433,7 +487,7 @@
       <h1>Humidité du Sol</h1>
     </div>
     <div class="mainBoxElement">
-      <i class="fa-solid fa-seedling fa-2xl" style="padding: 10px; font-size: 40px; color: #ffffff;"></i>
+      <i class="fa-solid fa-seedling fa-2xl" style="padding: 10px; color: #ffffff;"></i>
       <h1 class="latest-data">{latestSoilMoisture} m<sup>3</sup>/m<sup>3</sup></h1>
     </div>
     {#if showSoilMoistureChart}
@@ -459,7 +513,7 @@
       <h1>Vitesse du Vent</h1>
     </div>
     <div class="mainBoxElement">
-      <i class="fa-solid fa-wind fa-2xl" style="padding: 10px; font-size: 40px; color: #ffffff;"></i>
+      <i class="fa-solid fa-wind fa-2xl" style="padding: 10px; color: #ffffff;"></i>
       <h1 class="latest-data">{latestWind} m/s</h1>
     </div>    
     {#if showWindChart} 
@@ -486,7 +540,7 @@
       <h1>Humidité Relative</h1>
     </div>
     <div class="mainBoxElement">
-      <i class="fa-solid fa-tint fa-2xl" style="padding: 10px; font-size: 40px; color: #ffffff;"></i>
+      <i class="fa-solid fa-tint fa-2xl" style="padding: 10px; color: #ffffff;"></i>
       <h1 class="latest-data">{latestHumidity} %</h1>
     </div>
     {#if showHumidityChart}
@@ -513,7 +567,7 @@
     <h1>Rayonnement Solaire</h1>
   </div>
   <div class="mainBoxElement">
-    <i class="fa-solid fa-sun fa-2xl" style="padding: 10px; font-size: 40px; color: #ffffff;"></i>
+    <i class="fa-solid fa-sun fa-2xl" style="padding: 10px; color: #ffffff;"></i>
     <h1 class="latest-data">{latestSolarRadiation} W/m<sup>2</sup></h1>
   </div>
   {#if showSolarRadiationChart}
@@ -532,5 +586,14 @@
   </div>
 </button>
 
-
 </div>
+
+<div class="chart-container">
+  {#if predictionChartData.datasets.length > 0}
+      <PredictedPrecipChart chartData={predictionChartData} />
+  {:else}
+      <p>Loading chart data...</p>
+  {/if}
+</div>
+
+

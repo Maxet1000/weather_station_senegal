@@ -83,3 +83,130 @@ export async function fetchPrecipitationData(station) {
     return { timestamps: [], precipitations: [] };
   }
 }
+
+// src/lib/dataService.js
+import Papa from 'papaparse';
+
+// (If not already present, you can copy or import these helper functions.)
+export function generateDatePoints(startDateString, count, intervalDays) {
+  const startDate = new Date(startDateString);
+  const points = [];
+  for (let i = 0; i < count; i++) {
+    points.push(new Date(startDate));
+    startDate.setDate(startDate.getDate() + intervalDays);
+  }
+  return points;
+}
+
+// New function to fetch predicted precipitation data
+export async function fetchPredictedPrecipData(station) {
+  // Assuming station corresponds to districtId; adjust if needed.
+  // Use your CSV endpoints from chart-data.js:
+  const baseLineUrl = `https://vito-server-proxy.maxemile-meylaerts.workers.dev/seasonal_forecasts/precipitation_seasonal-ecmwf-fc-start-month-01_decade-`;
+  const lineSuffix = '_median_2025.csv';
+
+  const baseBarUrl = `https://vito-server-proxy.maxemile-meylaerts.workers.dev/seasonal_forecasts/precipitation_reference_decade-`;
+  const barSuffix = '_median_2006.csv';
+
+  const baseRangeUrl = `https://vito-server-proxy.maxemile-meylaerts.workers.dev/seasonal_forecasts/precipitation_seasonal-ecmwf-fc-start-month-01_decade-`;
+  const rangeStartSuffix = '_q10_2025.csv';
+  const rangeEndSuffix = '_q90_2025.csv';
+
+  // Helper to fetch and parse a CSV for a given URL and field.
+  async function fetchCsvValue(url) {
+    try {
+      const res = await fetch(url);
+      if (!res.ok) {
+        console.log(`No data found for URL: ${url}`);
+        return null;
+      }
+      const csvText = await res.text();
+      const results = Papa.parse(csvText, { header: true });
+      const row = results.data.find(
+        (item) => String(item.district_id) === String(station)
+      );
+      return row ? parseFloat(row.value) : null;
+    } catch (err) {
+      console.error(`Error processing ${url}:`, err);
+      return null;
+    }
+  }
+
+  const count = 36; // 36 points (each 10 days apart)
+  const promisesLine = [];
+  const promisesBar = [];
+  const promisesRangeStart = [];
+  const promisesRangeEnd = [];
+
+  for (let i = 0; i < count; i++) {
+    const twoDigit = i.toString().padStart(2, '0');
+    promisesLine.push(
+      fetchCsvValue(`${baseLineUrl}${twoDigit}${lineSuffix}`)
+    );
+    promisesBar.push(
+      fetchCsvValue(`${baseBarUrl}${twoDigit}${barSuffix}`)
+    );
+    promisesRangeStart.push(
+      fetchCsvValue(`${baseRangeUrl}${twoDigit}${rangeStartSuffix}`)
+    );
+    promisesRangeEnd.push(
+      fetchCsvValue(`${baseRangeUrl}${twoDigit}${rangeEndSuffix}`)
+    );
+  }
+
+  // Wait for all CSV files to resolve.
+  const [lineValues, barValues, rangeStartValues, rangeEndValues] = await Promise.all([
+    Promise.all(promisesLine),
+    Promise.all(promisesBar),
+    Promise.all(promisesRangeStart),
+    Promise.all(promisesRangeEnd)
+  ]);
+
+  // Generate date labels.
+  // For example, we use a start date of Jan 1, 2025 and interval of 10 days.
+  const labels = generateDatePoints("2025-01-01", count, 10).map(date =>
+    date.toISOString()
+  );
+
+  // Build chart datasets.
+  const datasets = [
+    // Lower prediction: invisible line, used for fill
+    {
+      label: 'Prediction Lower Bound',
+      data: rangeStartValues,
+      borderColor: 'rgba(0, 0, 255, 0)',
+      backgroundColor: 'rgba(0, 0, 255, 0.1)',
+      fill: false,
+      pointRadius: 0
+    },
+    // Upper prediction: fill between this and the previous dataset
+    {
+      label: 'Prediction Upper Bound',
+      data: rangeEndValues,
+      borderColor: 'rgba(0, 0, 255, 0)',
+      backgroundColor: 'rgba(0, 0, 255, 0.1)',
+      fill: '-1', // fill from this dataset down to the previous dataset
+      pointRadius: 0
+    },
+    {
+      label: 'Average Prediction',
+      data: lineValues,
+      borderColor: 'rgba(255, 99, 132, 1)',
+      backgroundColor: 'rgba(255, 99, 132, 0.2)',
+      fill: false,
+      tension: 0.1,
+      pointRadius: 3
+    },
+    {
+      label: 'Historical Average',
+      data: barValues,
+      borderColor: 'rgba(75, 192, 192, 1)',
+      backgroundColor: 'rgba(75, 192, 192, 0.2)',
+      fill: false,
+      tension: 0.1,
+      pointRadius: 3
+    }
+  ];
+
+  return { labels, datasets };
+}
