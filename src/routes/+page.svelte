@@ -10,9 +10,7 @@
   import { fetchStationData, fetchPrecipitationData } from '$lib/dataService.js';
 
   import PredictedPrecipChart from '$lib/components/PredictedPrecipChart.svelte';
-  import { getBarValues, getLineValues, getRangeStartValues, getRangeEndValues, generateDecadeDates, zipXY } from '$lib/chart-data.js';
-  import Papa from 'papaparse';
-
+  import { getBarValues, getLineValues, getRangeStartValues, getRangeEndValues, generateDecadeDates, zipXY, findNewestValidPath } from '$lib/chart-data.js';
   
   import "./page.css";
   import '@fortawesome/fontawesome-free/css/all.min.css'
@@ -226,51 +224,56 @@
     updateData();
 
     // Fetch chart data
-    let barValues = await getBarValues(1);
-        let lineValues = await getLineValues(1);
-        let rangeStartValues = await getRangeStartValues(1);
-        let rangeEndValues = await getRangeEndValues(1);
-        const dateArray = generateDecadeDates('2025-01-01', 36); // 36 decades
-        console.log(dateArray);
-        predictionChartData = {
-            datasets: [
-                {
-                    type: 'bar',
-                    label: 'Bar Data',
-                    data: zipXY(dateArray, barValues),
-                    backgroundColor: 'rgba(153, 153, 153, 1)',
-                    borderColor: 'rgba(153, 153, 153, 1)',
-                    borderWidth: 1,
-                },
-                {
-                    type: 'line',
-                    label: 'Line Data',
-                    data: zipXY(dateArray, lineValues),
-                    borderColor: 'rgba(0, 100, 0, 1)',
-                    borderWidth: 2,
-                    fill: false,
-                    tension: 0.4,
-                },
-                {
-                    type: 'line',
-                    label: 'Range Start',
-                    data: zipXY(dateArray, rangeStartValues),
-                    borderColor: 'rgba(0, 0, 0, 0)',
-                    backgroundColor: 'rgba(0, 100, 0, 0.2)',
-                    fill: false,
-                    pointRadius: 0,
-                },
-                {
-                    type: 'line',
-                    label: 'Range End',
-                    data: zipXY(dateArray, rangeEndValues),
-                    borderColor: 'rgba(0, 0, 0, 0)',
-                    backgroundColor: 'rgba(0, 100, 0, 0.2)',
-                    fill: 2,
-                    pointRadius: 0,
-                },
-            ],
-        };
+    const newestPath = await findNewestValidPath();
+    let latestYear = newestPath.year;
+    let latestMonth = newestPath.month; 
+    console.log(latestYear, latestMonth);
+    let barValues = await getBarValues(1, latestMonth);
+    let lineValues = await getLineValues(1, latestYear, latestMonth);
+    let rangeStartValues = await getRangeStartValues(1, latestYear, latestMonth);
+    let rangeEndValues = await getRangeEndValues(1, latestYear, latestMonth);
+    const startDate = `${latestYear}-${latestMonth}-01`;
+    let dateArray = generateDecadeDates(startDate,18);
+    console.log(dateArray);
+    predictionChartData = {
+      datasets: [
+        {
+            type: 'bar',
+            label: 'Bar Data',
+            data: zipXY(dateArray, barValues),
+            backgroundColor: 'rgba(153, 153, 153, 1)',
+            borderColor: 'rgba(153, 153, 153, 1)',
+            borderWidth: 1,
+        },
+        {
+            type: 'line',
+            label: 'Line Data',
+            data: zipXY(dateArray, lineValues),
+            borderColor: 'rgba(0, 100, 0, 1)',
+            borderWidth: 2,
+            fill: false,
+            tension: 0.4,
+        },
+        {
+            type: 'line',
+            label: 'Range Start',
+            data: zipXY(dateArray, rangeStartValues),
+            borderColor: 'rgba(0, 0, 0, 0)',
+            backgroundColor: 'rgba(0, 100, 0, 0.2)',
+            fill: false,
+            pointRadius: 0,
+        },
+        {
+            type: 'line',
+            label: 'Range End',
+            data: zipXY(dateArray, rangeEndValues),
+            borderColor: 'rgba(0, 0, 0, 0)',
+            backgroundColor: 'rgba(0, 100, 0, 0.2)',
+            fill: 2,
+            pointRadius: 0,
+        },
+      ],
+    };
   });
 
   function handleStationChange(event) {

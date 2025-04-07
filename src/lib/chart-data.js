@@ -4,156 +4,220 @@
 import Papa from 'papaparse';
   
 
-export async function getBarValues(districtId) {
+export async function getBarValues(districtId, latestMonth) {
+    const monthInt = parseInt(latestMonth);
     const baseUrl =
         'https://vito-server-proxy.maxemile-meylaerts.workers.dev/Previsions/reference/precipitation_reference_decade-';
     const suffix = '_median_2006.csv';
+    const barValues = [];
 
-    // Create an array of promises, one for each CSV (from 00 to 35)
-    const promises = Array.from({ length: 36 }, (_, i) => {
-        const twoDigit = i.toString().padStart(2, '0');
+    let decadeIndex = 3 * (monthInt - 1);
+    while (barValues.length < 18) {
+        if (decadeIndex > 35) {
+            decadeIndex = 0;
+        }
+      
+        const twoDigit = decadeIndex.toString().padStart(2, '0');
         const url = `${baseUrl}${twoDigit}${suffix}`;
-
-        // Log the URL being accessed
+        
         console.log(`Fetching URL: ${url}`);
 
-        return fetch(url)
-            .then((res) => res.text())
-            .then((csvText) => {
-                // Parse the CSV text using PapaParse with header parsing enabled.
-                const results = Papa.parse(csvText, { header: true });
-                // Find the row matching the district_id (compare as strings)
-                const row = results.data.find(
-                    (item) => String(item.district_id) === String(districtId)
-                );
-                // Return the parsed value (or null if not found)
-                return row ? parseFloat(row.value) : null;
-            })
-            .catch((err) => {
-                console.error(`Error processing ${url}:`, err);
-                return null;
-            });
-    });
+        try {
+          const res = await fetch(url);
+          if (res.ok) {
+            const csvText = await res.text();
+            const results = Papa.parse(csvText, { header: true });
+            const row = results.data.find(
+              (item) => String(item.district_id) === String(districtId)
+            );
+            if (row) {
+                barValues.push(parseFloat(row.value));
+            } else {
+                barValues.push(null);
+            }
+          } else {
+            barValues.push(null);
+          }
+        } catch (err) {
+            barValues.push(null);
+        }
+        decadeIndex++;
+    }
 
-    // Wait for all CSV files to be processed
-    const barValues = await Promise.all(promises);
-        // Log the final bar values array
-        console.log("Final barValues:", barValues);
+
     return barValues;
 }
 
-export async function getLineValues(districtId) {
+export async function findNewestValidPath() {
+    let date = new Date();
+    let currentMonth = date.getMonth() + 1; // JavaScript months are 0-indexed, so add 1.
+    let currentYear = date.getFullYear();
+    let m = 0;
+
+    while (m < 100) {
+      // Format the month to always be two digits (e.g., "04")
+      const monthStr = currentMonth.toString().padStart(2, '0');
+      const url = `https://vito-server-proxy.maxemile-meylaerts.workers.dev/Previsions/fc-start-month-${monthStr}_${currentYear}/`;
+      //console.log(`Checking URL: ${url}`);
+
+      try {
+        // We use a HEAD request so we don't have to download the whole file.
+        const response = await fetch(url, { method: 'HEAD' });
+        if (response.ok) {
+          // A valid URL is found
+          //console.log(`Found valid URL for ${monthStr}/${currentYear}`);
+          return { year: currentYear, month: monthStr };
+        }
+      } catch (err) {
+        //console.error(`Error checking ${url}:`, err);
+      }
+
+      // Decrement month; if we're at January, wrap to December of the previous year.
+      currentMonth -= 1;
+      if (currentMonth < 1) {
+        currentMonth = 12;
+        currentYear -= 1;
+      }
+      m++;
+    }
+  }
+
+export async function getLineValues(districtId, latestYear, latestMonth) {  
+    const monthStr = latestMonth.padStart(2, '0');
+    const monthInt = parseInt(latestMonth);
     const baseUrl =
-        'https://vito-server-proxy.maxemile-meylaerts.workers.dev/Previsions/fc-start-month-03_2025/precipitation_seasonal-ecmwf-fc-start-month-03_decade-';
-    const suffix = '_median_2025.csv';
-    const lineValues = new Array(36).fill(null); // Initialize with null values
+        `https://vito-server-proxy.maxemile-meylaerts.workers.dev/Previsions/fc-start-month-${monthStr}_${latestYear}/precipitation_seasonal-ecmwf-fc-start-month-${monthStr}_decade-`;
+    let suffix = `_median_${latestYear}.csv`;
+    const lineValues = [];
 
-    for (let i = 0; i < 36; i++) {
-        const twoDigit = i.toString().padStart(2, '0');
+    let decadeIndex = 3 * (monthInt - 1);
+    while (lineValues.length < 18) {
+        if (decadeIndex > 35) {
+            decadeIndex = 0;
+            latestYear++;
+            suffix = `_median_${latestYear}.csv`;
+        }
+      
+        const twoDigit = decadeIndex.toString().padStart(2, '0');
         const url = `${baseUrl}${twoDigit}${suffix}`;
-
+        
         console.log(`Fetching URL: ${url}`);
 
         try {
-            const res = await fetch(url);
-            if (!res.ok) {
-                console.log(`No data found for URL: ${url}`);
-                continue; // Skip to the next URL if no data
-            }
+          const res = await fetch(url);
+          if (res.ok) {
             const csvText = await res.text();
             const results = Papa.parse(csvText, { header: true });
             const row = results.data.find(
-                (item) => String(item.district_id) === String(districtId)
+              (item) => String(item.district_id) === String(districtId)
             );
             if (row) {
-                lineValues[i] = parseFloat(row.value);
+              lineValues.push(parseFloat(row.value));
             } else {
-                console.log(`District ID ${districtId} not found in ${url}`);
+              lineValues.push(null);
             }
+          } else {
+            lineValues.push(null);
+          }
         } catch (err) {
-            console.error(`Error processing ${url}:`, err);
-            // lineValues[i] remains null, indicating an error or no data
+          lineValues.push(null);
         }
+        decadeIndex++;
     }
-
-    console.log("Final lineValues:", lineValues);
+    
     return lineValues;
 }
 
-export async function getRangeStartValues(districtId) {
+export async function getRangeStartValues(districtId, latestYear, latestMonth) {
+    const monthStr = latestMonth.padStart(2, '0');
+    const monthInt = parseInt(latestMonth);
     const baseUrl =
-        'https://vito-server-proxy.maxemile-meylaerts.workers.dev/Previsions/fc-start-month-03_2025/precipitation_seasonal-ecmwf-fc-start-month-03_decade-';
-    const suffix = '_q10_2025.csv';
-    const rangeStartValues = new Array(36).fill(null); // Initialize with null values
+        `https://vito-server-proxy.maxemile-meylaerts.workers.dev/Previsions/fc-start-month-${monthStr}_${latestYear}/precipitation_seasonal-ecmwf-fc-start-month-${monthStr}_decade-`;
+    let suffix = `_q10_${latestYear}.csv`;
+    const startValues = [];
 
-    for (let i = 0; i < 36; i++) {
-        const twoDigit = i.toString().padStart(2, '0');
+    let decadeIndex = 3 * (monthInt - 1);
+    while (startValues.length < 18) {
+        if (decadeIndex > 35) {
+            decadeIndex = 0;
+            latestYear++;
+            suffix = `_median_${latestYear}.csv`;
+        }
+      
+        const twoDigit = decadeIndex.toString().padStart(2, '0');
         const url = `${baseUrl}${twoDigit}${suffix}`;
-
+        
         console.log(`Fetching URL: ${url}`);
 
         try {
-            const res = await fetch(url);
-            if (!res.ok) {
-                console.log(`No data found for URL: ${url}`);
-                continue; // Skip to the next URL if no data
-            }
+          const res = await fetch(url);
+          if (res.ok) {
             const csvText = await res.text();
             const results = Papa.parse(csvText, { header: true });
             const row = results.data.find(
-                (item) => String(item.district_id) === String(districtId)
+              (item) => String(item.district_id) === String(districtId)
             );
             if (row) {
-                rangeStartValues[i] = parseFloat(row.value);
+                startValues.push(parseFloat(row.value));
             } else {
-                console.log(`District ID ${districtId} not found in ${url}`);
+                startValues.push(null);
             }
+          } else {
+            startValues.push(null);
+          }
         } catch (err) {
-            console.error(`Error processing ${url}:`, err);
-            // rangeStartValues[i] remains null, indicating an error or no data
+            startValues.push(null);
         }
+        decadeIndex++;
     }
-
-    console.log("Final rangeStartValues:", rangeStartValues);
-    return rangeStartValues;
+    
+    return startValues;
 }
 
-export async function getRangeEndValues(districtId) {
+export async function getRangeEndValues(districtId, latestYear, latestMonth) {
+    const monthStr = latestMonth.padStart(2, '0');
+    const monthInt = parseInt(latestMonth);
     const baseUrl =
-        'https://vito-server-proxy.maxemile-meylaerts.workers.dev/Previsions/fc-start-month-03_2025/precipitation_seasonal-ecmwf-fc-start-month-03_decade-';
-    const suffix = '_q90_2025.csv';
-    const rangeEndValues = new Array(36).fill(null); // Initialize with null values
+        `https://vito-server-proxy.maxemile-meylaerts.workers.dev/Previsions/fc-start-month-${monthStr}_${latestYear}/precipitation_seasonal-ecmwf-fc-start-month-${monthStr}_decade-`;
+    let suffix = `_q90_${latestYear}.csv`;
+    const endValues = [];
 
-    for (let i = 0; i < 36; i++) {
-        const twoDigit = i.toString().padStart(2, '0');
+    let decadeIndex = 3 * (monthInt - 1);
+    while (endValues.length < 18) {
+        if (decadeIndex > 35) {
+            decadeIndex = 0;
+            latestYear++;
+            suffix = `_median_${latestYear}.csv`;
+        }
+      
+        const twoDigit = decadeIndex.toString().padStart(2, '0');
         const url = `${baseUrl}${twoDigit}${suffix}`;
-
+        
         console.log(`Fetching URL: ${url}`);
 
         try {
-            const res = await fetch(url);
-            if (!res.ok) {
-                console.log(`No data found for URL: ${url}`);
-                continue; // Skip to the next URL if no data
-            }
+          const res = await fetch(url);
+          if (res.ok) {
             const csvText = await res.text();
             const results = Papa.parse(csvText, { header: true });
             const row = results.data.find(
-                (item) => String(item.district_id) === String(districtId)
+              (item) => String(item.district_id) === String(districtId)
             );
             if (row) {
-                rangeEndValues[i] = parseFloat(row.value);
+                endValues.push(parseFloat(row.value));
             } else {
-                console.log(`District ID ${districtId} not found in ${url}`);
+                endValues.push(null);
             }
+          } else {
+            endValues.push(null);
+          }
         } catch (err) {
-            console.error(`Error processing ${url}:`, err);
-            // rangeEndValues[i] remains null, indicating an error or no data
+            endValues.push(null);
         }
+        decadeIndex++;
     }
-
-    console.log("Final rangeEndValues:", rangeEndValues);
-    return rangeEndValues;
+    
+    return endValues;
 }
 
 
