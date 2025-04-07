@@ -157,19 +157,6 @@ export async function getRangeEndValues(districtId) {
 }
 
 
-// For simplicity, define 36 points, each 10 days apart:
-export function generateDatePoints(startDateString, count, intervalDays) {
-    const startDate = new Date(startDateString);
-    const points = [];
-    for (let i = 0; i < count; i++) {
-        // Clone the date and push
-        points.push(new Date(startDate));
-        // Move forward by intervalDays
-        startDate.setDate(startDate.getDate() + intervalDays);
-    }
-    return points;
-}
-
 export function generateDecadeDates(startDateStr, count) {
     const result = [];
     const startDate = new Date(startDateStr);

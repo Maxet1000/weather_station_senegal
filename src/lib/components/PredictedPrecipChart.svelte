@@ -3,6 +3,11 @@
     import { Chart, registerables } from 'chart.js';
     import 'chartjs-adapter-date-fns'; // <-- Required for time axis
     import { onMount } from 'svelte';
+
+    import { setDefaultOptions } from 'date-fns';
+    import { fr } from 'date-fns/locale';
+
+    setDefaultOptions({ locale: fr });
   
     Chart.register(...registerables);
   
@@ -28,7 +33,7 @@
           beginAtZero: true,
           title: {
             display: true,
-            text: 'Precipitation (mm)'
+            text: 'Précipitation (mm)'
           },
           ticks: {
             stepSize: 30
@@ -38,7 +43,7 @@
       plugins: {
         title: {
           display: true,
-          text: 'Precipitation - June July August',
+          text: 'Précipitations Prévues',
           padding: {
             top: 10,
             bottom: 30

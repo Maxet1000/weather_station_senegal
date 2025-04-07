@@ -12,8 +12,10 @@
       TimeScale  // Use TimeScale for date/time values
     } from 'chart.js';
     import 'chartjs-adapter-date-fns'; // Date adapter for time scale
-    import { fr } from 'date-fns/locale'
+    import { setDefaultOptions } from 'date-fns';
+    import { fr } from 'date-fns/locale';
 
+    setDefaultOptions({ locale: fr });
   
     // Chart plugins
     let zoomPlugin;

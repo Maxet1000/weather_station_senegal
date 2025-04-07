@@ -14,8 +14,10 @@
     Legend
   } from 'chart.js';
   import 'chartjs-adapter-date-fns';
-  import { fr } from 'date-fns/locale'
+  import { setDefaultOptions } from 'date-fns';
+  import { fr } from 'date-fns/locale';
 
+  setDefaultOptions({ locale: fr });
   let zoomPlugin;
   let annotationPlugin;
   let pluginsLoaded = false;
