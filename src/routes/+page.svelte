@@ -239,7 +239,7 @@
       datasets: [
         {
             type: 'bar',
-            label: 'Bar Data',
+            label: 'Données Historiques (1991-2020)',
             data: zipXY(dateArray, barValues),
             backgroundColor: 'rgba(153, 153, 153, 1)',
             borderColor: 'rgba(153, 153, 153, 1)',
@@ -247,16 +247,17 @@
         },
         {
             type: 'line',
-            label: 'Line Data',
+            label: 'Prévision Saisonnière (médiane)',
             data: zipXY(dateArray, lineValues),
             borderColor: 'rgba(0, 100, 0, 1)',
+            backgroundColor: 'rgba(0, 100, 0, 1)',
             borderWidth: 2,
             fill: false,
             tension: 0.4,
         },
         {
             type: 'line',
-            label: 'Range Start',
+            label: 'Prévision Saisonnière (écart du 10e au 90e percentile)',
             data: zipXY(dateArray, rangeStartValues),
             borderColor: 'rgba(0, 0, 0, 0)',
             backgroundColor: 'rgba(0, 100, 0, 0.2)',
@@ -271,6 +272,7 @@
             backgroundColor: 'rgba(0, 100, 0, 0.2)',
             fill: 2,
             pointRadius: 0,
+            showInLegend: false,
         },
       ],
     };

@@ -241,7 +241,7 @@
       datasets: [
         {
             type: 'bar',
-            label: 'Bar Data',
+            label: 'Données Historiques (1991-2020)',
             data: zipXY(dateArray, barValues),
             backgroundColor: 'rgba(153, 153, 153, 1)',
             borderColor: 'rgba(153, 153, 153, 1)',

@@ -50,7 +50,22 @@
           }
         },
         legend: {
-          display: false
+          display: true,
+          labels: {
+            generateLabels: function(chart) {
+              return chart.data.datasets
+                .map((dataset, i) => ({
+                  text: dataset.label,
+                  fillStyle: dataset.backgroundColor,
+                  strokeStyle: dataset.borderColor,
+                  lineWidth: dataset.borderWidth,
+                  hidden: !chart.isDatasetVisible(i),
+                  index: i,
+                  _customHide: dataset.showInLegend === false
+                }))
+                .filter(label => !label._customHide);
+            }
+          }
         },
         tooltip: {
           mode: 'index',
