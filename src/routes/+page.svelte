@@ -228,10 +228,11 @@
     let latestYear = newestPath.year;
     let latestMonth = newestPath.month; 
     console.log(latestYear, latestMonth);
-    let barValues = await getBarValues(1, latestMonth);
-    let lineValues = await getLineValues(1, latestYear, latestMonth);
-    let rangeStartValues = await getRangeStartValues(1, latestYear, latestMonth);
-    let rangeEndValues = await getRangeEndValues(1, latestYear, latestMonth);
+    let districtID = 37; // Assuming station is the district ID
+    let barValues = await getBarValues(districtID, latestMonth);
+    let lineValues = await getLineValues(districtID, latestYear, latestMonth);
+    let rangeStartValues = await getRangeStartValues(districtID, latestYear, latestMonth);
+    let rangeEndValues = await getRangeEndValues(districtID, latestYear, latestMonth);
     const startDate = `${latestYear}-${latestMonth}-01`;
     let dateArray = generateDecadeDates(startDate,18);
     console.log(dateArray);
@@ -590,7 +591,6 @@
     {showSolarRadiationChart ? 'Afficher Moins' : 'Afficher Graphique'}
   </div>
 </button>
-
 
 
 </div>
