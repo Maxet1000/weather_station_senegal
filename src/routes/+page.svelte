@@ -228,7 +228,7 @@
     let latestYear = newestPath.year;
     let latestMonth = newestPath.month; 
     console.log(latestYear, latestMonth);
-    let districtID = 37; // Assuming station is the district ID
+    let districtID = 37;
     let barValues = await getBarValues(districtID, latestMonth);
     let lineValues = await getLineValues(districtID, latestYear, latestMonth);
     let rangeStartValues = await getRangeStartValues(districtID, latestYear, latestMonth);
@@ -320,11 +320,14 @@
   }
 
   function downloadCSV() {
+    const count = datapointsMapping[timeframe];
+    const totalPoints = allTimestamps.length;
+    const startIndex = totalPoints > count ? totalPoints - count : 0;
     // Define the CSV header
     let csv = "Timestamp,Temperature,Precipitation,Wind Speed,Relative Humidity,Soil Moisture,Solar Radiation\n";
 
     // Loop over the data arrays (assuming all arrays have the same length)
-    for (let i = 0; i < allTimestamps.length; i++) {
+    for (let i = startIndex; i < allTimestamps.length; i++) {
       csv += `${allTimestamps[i]},${allTemperatures[i]},${allPrecipitations10min[i]},${allWinds[i]},${allRelativeHumidities[i]},${allSoilMoisture[i]},${allSolarRadiation[i]}\n`;
     }
   
@@ -418,7 +421,7 @@
     <option value="1">Mbar Toubap</option>
     <option value="2">Seno Ndawédiee</option>
     <option value="3">Labgar</option>
-    <option value="4">Loumbol djiby</option>
+    <option value="4">Loumbol Djiby</option>
   </select>
 
   <label for="timeframe">Période: </label>

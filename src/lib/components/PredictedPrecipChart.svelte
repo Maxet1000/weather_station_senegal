@@ -73,10 +73,10 @@
           callbacks: {
             title: (tooltipItems) => {
               // Show date in your desired format
-              const date = tooltipItems[0].parsed.x;
-              // You can format the date here, e.g. with date-fns
-              // return format(date, 'MMM d, yyyy');
-              return date.toDateString();
+              const timestamp = tooltipItems[0].parsed.x;
+              const dateObj = new Date(timestamp);
+              return dateObj.toDateString();
+
             },
             label: (tooltipItem) => {
               let label = tooltipItem.dataset.label || '';
