@@ -163,6 +163,7 @@
             annotations: dayAnnotation ? { selectedDay: dayAnnotation } : {}
           },
           tooltip: {
+            displayColors: false,
             callbacks: {
               label: function(context) {
                 const rawValue = context.parsed.y;

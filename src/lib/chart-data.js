@@ -254,3 +254,30 @@ export function zipXY(dates, values) {
         y: values[i] ?? 0
     }));
 }
+
+export function getDecadeEndDate(decadeStartDate) {
+  // Extract year, month, and day from the input date.
+  // Note: In JavaScript, the month is zero-indexed (January is 0, February is 1, etc.).
+  const year = decadeStartDate.getFullYear();
+  const month = decadeStartDate.getMonth();
+  const day = decadeStartDate.getDate();
+
+  // Determine the end of the "decade"
+  if (day === 1) {
+    // For a decade starting on the 1st, return the 10th of the same month.
+    return new Date(year, month, 10);
+  } else if (day === 11) {
+    // For a decade starting on the 11th, return the 20th of the same month.
+    return new Date(year, month, 20);
+  } else if (day === 21) {
+    // For a decade starting on the 21st, calculate the last day of the month.
+    // By specifying day as 0 for the next month, we get the last day of the current month.
+    return new Date(year, month + 1, 0);
+  } else {
+    // If the provided date doesn't match one of our expected start dates,
+    // throw an error to indicate invalid input.
+    throw new Error("Invalid decade start date. It must be the 1st, 11th, or 21st of the month.");
+  }
+}
+
+

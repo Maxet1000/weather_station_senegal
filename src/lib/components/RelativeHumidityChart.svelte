@@ -147,6 +147,11 @@
             legend: {
                 display: false
             },
+            tooltip: {
+              displayColors: false,
+              mode: 'index',
+              intersect: false,
+            },
             zoom: {
               pan: { enabled: true, mode: 'x', threshold: 10 },
               zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' },
