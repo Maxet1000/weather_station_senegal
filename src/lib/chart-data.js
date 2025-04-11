@@ -44,7 +44,7 @@ export async function getBarValues(districtId, latestMonth) {
         decadeIndex++;
     }
 
-
+    console.log(barValues) 
     return barValues;
 }
 
@@ -233,7 +233,7 @@ export function generateDecadeDates(startDateStr, count) {
       for (const d of days) {
         const date = new Date(currentYear, currentMonth, d);
         // Only add dates that are on or after the start date.
-        if (date >= startDate && result.length < count) {
+        if (result.length < count) {
           result.push(date);
         }
       }
