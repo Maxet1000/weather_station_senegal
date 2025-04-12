@@ -262,16 +262,6 @@
     };
   }
   
-
-  // Auto-update chart data when timeframe changes.
-  $: updateChartData();
-  $: updateWindChartData();
-  $: updatePrecipitationChartData();
-  $: updateHumidityChartData();
-  $: updateSoilMoistureChartData();
-  $: updateSolarRadiationChartData();
-
-  
   onMount(async () => {
     storedStation.subscribe(val => {
       // Only update if there's a value from the store.

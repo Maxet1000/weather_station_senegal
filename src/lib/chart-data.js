@@ -3,6 +3,40 @@
 
 import Papa from 'papaparse';
   
+const csvCache = {};
+
+async function fetchCsv(url) {
+  if (csvCache[url]) {
+    return csvCache[url];
+  }
+  try {
+    const res = await fetch(url);
+    console.log(`Fetching URL: ${url}`);
+    if (!res.ok) {
+      throw new Error(`HTTP error: ${res.status}`);
+    }
+    const csvText = await res.text();
+    const results = Papa.parse(csvText, { header: true });
+    csvCache[url] = results.data;
+    return results.data;
+  } catch (err) {
+    console.error("Error fetching CSV:", err);
+    throw err;
+  }
+}
+
+async function fetchCsvValue(url, districtId) {
+  try {
+    const data = await fetchCsv(url);
+    const row = data.find(
+      (item) => String(item.district_id) === String(districtId)
+    );
+    return row ? parseFloat(row.value) : null;
+  } catch (err) {
+    return null;
+  }
+}
+
 
 export async function getBarValues(districtId, latestMonth) {
     const monthInt = parseInt(latestMonth);
@@ -20,27 +54,9 @@ export async function getBarValues(districtId, latestMonth) {
         const twoDigit = decadeIndex.toString().padStart(2, '0');
         const url = `${baseUrl}${twoDigit}${suffix}`;
         
-        console.log(`Fetching URL: ${url}`);
-
-        try {
-          const res = await fetch(url);
-          if (res.ok) {
-            const csvText = await res.text();
-            const results = Papa.parse(csvText, { header: true });
-            const row = results.data.find(
-              (item) => String(item.district_id) === String(districtId)
-            );
-            if (row) {
-                barValues.push(parseFloat(row.value));
-            } else {
-                barValues.push(null);
-            }
-          } else {
-            barValues.push(null);
-          }
-        } catch (err) {
-            barValues.push(null);
-        }
+        const value = await fetchCsvValue(url, districtId);
+        barValues.push(value);
+    
         decadeIndex++;
     }
 
@@ -101,27 +117,9 @@ export async function getLineValues(districtId, latestYear, latestMonth) {
         const twoDigit = decadeIndex.toString().padStart(2, '0');
         const url = `${baseUrl}${twoDigit}${suffix}`;
         
-        console.log(`Fetching URL: ${url}`);
+        const value = await fetchCsvValue(url, districtId);
+        lineValues.push(value);
 
-        try {
-          const res = await fetch(url);
-          if (res.ok) {
-            const csvText = await res.text();
-            const results = Papa.parse(csvText, { header: true });
-            const row = results.data.find(
-              (item) => String(item.district_id) === String(districtId)
-            );
-            if (row) {
-              lineValues.push(parseFloat(row.value));
-            } else {
-              lineValues.push(null);
-            }
-          } else {
-            lineValues.push(null);
-          }
-        } catch (err) {
-          lineValues.push(null);
-        }
         decadeIndex++;
     }
     
@@ -147,27 +145,9 @@ export async function getRangeStartValues(districtId, latestYear, latestMonth) {
         const twoDigit = decadeIndex.toString().padStart(2, '0');
         const url = `${baseUrl}${twoDigit}${suffix}`;
         
-        console.log(`Fetching URL: ${url}`);
+        const value = await fetchCsvValue(url, districtId);
+        startValues.push(value);
 
-        try {
-          const res = await fetch(url);
-          if (res.ok) {
-            const csvText = await res.text();
-            const results = Papa.parse(csvText, { header: true });
-            const row = results.data.find(
-              (item) => String(item.district_id) === String(districtId)
-            );
-            if (row) {
-                startValues.push(parseFloat(row.value));
-            } else {
-                startValues.push(null);
-            }
-          } else {
-            startValues.push(null);
-          }
-        } catch (err) {
-            startValues.push(null);
-        }
         decadeIndex++;
     }
     
@@ -193,27 +173,9 @@ export async function getRangeEndValues(districtId, latestYear, latestMonth) {
         const twoDigit = decadeIndex.toString().padStart(2, '0');
         const url = `${baseUrl}${twoDigit}${suffix}`;
         
-        console.log(`Fetching URL: ${url}`);
+        const value = await fetchCsvValue(url, districtId);
+        endValues.push(value);
 
-        try {
-          const res = await fetch(url);
-          if (res.ok) {
-            const csvText = await res.text();
-            const results = Papa.parse(csvText, { header: true });
-            const row = results.data.find(
-              (item) => String(item.district_id) === String(districtId)
-            );
-            if (row) {
-                endValues.push(parseFloat(row.value));
-            } else {
-                endValues.push(null);
-            }
-          } else {
-            endValues.push(null);
-          }
-        } catch (err) {
-            endValues.push(null);
-        }
         decadeIndex++;
     }
     
