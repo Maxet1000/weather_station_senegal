@@ -92,6 +92,7 @@
     updateHumidityChartData();
     updateSoilMoistureChartData();
     updateSolarRadiationChartData();
+    updatePredictionChartData();
   }
   
   function updateChartData() {
@@ -203,36 +204,17 @@
       };
     }
   }
-  
 
-  // Auto-update chart data when timeframe changes.
-  $: updateChartData();
-  $: updateWindChartData();
-  $: updatePrecipitationChartData();
-  $: updateHumidityChartData();
-  $: updateSoilMoistureChartData();
-  $: updateSolarRadiationChartData();
-
-  
-  onMount(async () => {
-    storedStation.subscribe(val => {
-      // Only update if there's a value from the store.
-      if (val) {
-        station = val;
-      }
-    });
-    updateData();
-
-    // Fetch chart data
+  async function updatePredictionChartData() {
     const newestPath = await findNewestValidPath();
     let latestYear = newestPath.year;
     let latestMonth = newestPath.month; 
     console.log(latestYear, latestMonth);
-    let districtID = 37;
-    let barValues = await getBarValues(districtID, latestMonth);
-    let lineValues = await getLineValues(districtID, latestYear, latestMonth);
-    let rangeStartValues = await getRangeStartValues(districtID, latestYear, latestMonth);
-    let rangeEndValues = await getRangeEndValues(districtID, latestYear, latestMonth);
+    let districtID_ref = 37;
+    let barValues = await getBarValues(districtID_ref, latestMonth);
+    let lineValues = await getLineValues(station, latestYear, latestMonth);
+    let rangeStartValues = await getRangeStartValues(station, latestYear, latestMonth);
+    let rangeEndValues = await getRangeEndValues(station, latestYear, latestMonth);
     const startDate = `${latestYear}-${latestMonth}-01`;
     let dateArray = generateDecadeDates(startDate,18);
     console.log(dateArray);
@@ -278,6 +260,29 @@
         },
       ],
     };
+  }
+  
+
+  // Auto-update chart data when timeframe changes.
+  $: updateChartData();
+  $: updateWindChartData();
+  $: updatePrecipitationChartData();
+  $: updateHumidityChartData();
+  $: updateSoilMoistureChartData();
+  $: updateSolarRadiationChartData();
+
+  
+  onMount(async () => {
+    storedStation.subscribe(val => {
+      // Only update if there's a value from the store.
+      if (val) {
+        station = val;
+      }
+    });
+    updateData();
+
+    // Fetch chart data
+    
   });
 
   function handleStationChange(event) {
