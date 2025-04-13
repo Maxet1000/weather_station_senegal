@@ -224,19 +224,21 @@
             type: 'bar',
             label: 'Données Historiques (1991-2020)',
             data: zipXY(dateArray, barValues),
-            backgroundColor: 'rgba(153, 153, 153, 1)',
-            borderColor: 'rgba(153, 153, 153, 1)',
+            backgroundColor: 'rgba(203, 203, 203, 0.8)',
+            borderColor: 'rgba(203, 203, 203, 0.8)',
             borderWidth: 1,
+            order: 2,
         },
         {
             type: 'line',
             label: 'Prévision Saisonnière (médiane)',
             data: zipXY(dateArray, lineValues),
-            borderColor: 'rgba(0, 100, 0, 1)',
-            backgroundColor: 'rgba(0, 100, 0, 1)',
+            borderColor: 'rgba(8, 96, 169, 1)',
+            backgroundColor: 'rgba(8, 96, 169, 1)',
             borderWidth: 2,
             fill: false,
             tension: 0.4,
+            order: 1,
         },
         {
             type: 'line',
@@ -244,19 +246,21 @@
             labelcolor: 'rgba(0, 0, 0, 0)',
             data: zipXY(dateArray, rangeStartValues),
             borderColor: 'rgba(0, 0, 0, 0)',
-            backgroundColor: 'rgba(0, 100, 0, 0.2)',
+            backgroundColor: 'rgba(38, 126, 209, 0.5)',
             fill: false,
             pointRadius: 0,
+            order: 3,
         },
         {
             type: 'line',
             label: 'Range End',
             data: zipXY(dateArray, rangeEndValues),
             borderColor: 'rgba(0, 0, 0, 0)',
-            backgroundColor: 'rgba(0, 100, 0, 0.2)',
+            backgroundColor: 'rgba(38, 126, 209, 0.5)',
             fill: 2,
             pointRadius: 0,
             showInLegend: false,
+            order: 3,
         },
       ],
     };
@@ -288,6 +292,7 @@
   let showHumidityChart = false;
   let showSoilMoistureChart = false;
   let showSolarRadiationChart = false;
+  let showPredictionChart = false;
 
 
   
@@ -313,6 +318,10 @@
 
   function toggleSolarRadiation() {
     showSolarRadiationChart = !showSolarRadiationChart;
+  }
+
+  function togglePrediction() {
+    showPredictionChart = !showPredictionChart;
   }
 
   function downloadCSV() {
@@ -351,14 +360,23 @@
     margin-bottom: 1rem;
   }
   .box {
-    margin: 5px 0;
     background-color: #f9f9f9;
     text-align: left;
     width: 100%;
     border-radius: 15px;
     color: white;
     padding-bottom: 20px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border: none;
+  }
+  .smallBox {
+    background-color: #f9f9f9;
+    text-align: left;
+    width: 100%;
+    border-radius: 15px;
+    color: white;
+    padding-bottom: 20px;
+    padding-top: 45px;
+    border: none;
   }
   .boxTitle {
     text-align: center;
@@ -398,6 +416,7 @@
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    margin-bottom: 1rem;
   }
  /* 3 by 2 grid layout for larger screens */
  @media (min-width: 768px) {
@@ -406,6 +425,8 @@
       grid-template-columns: repeat(3, 1fr);
       grid-template-rows: auto auto;
       gap: 1rem;
+      margin-left: 0.5rem;
+      margin-right: 0.5rem;
     }
   }
 
@@ -591,15 +612,30 @@
   </div>
 </button>
 
-
-</div>
-
-<div class="chart-container">
-  {#if predictionChartData.datasets.length > 0}
+<button class="smallBox" style="background-color:#C2B280;" on:click={togglePrediction} aria-expanded={showPredictionChart}>
+  <div class="boxTitle">
+    <h1>Précipitation Prévues</h1>
+  </div>
+  {#if showPredictionChart}
+    {#if predictionChartData.datasets.length > 0}
+    <div 
+      class="content" 
+      role="button"
+      tabindex="0" 
+      on:click|stopPropagation
+      on:keydown={(event) => { if (event.key === "Enter" || event.key === " ") event.stopPropagation(); }}
+    >          
       <PredictedPrecipChart chartData={predictionChartData} />
-  {:else}
+    </div>
+    {:else}
       <p>Loading chart data...</p>
+    {/if}
   {/if}
+  
+  <div class="toggleLabel">
+    <i class="fa-solid {showSolarRadiationChart ? 'fa-chevron-up' : 'fa-chevron-down'}"></i>
+    {showSolarRadiationChart ? 'Afficher Moins' : 'Afficher Graphique'}
+  </div>
+</button>
+
 </div>
-
-

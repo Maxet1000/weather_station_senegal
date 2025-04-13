@@ -120,10 +120,10 @@
               color: 'rgba(255, 255, 255, 0.8)'
             },
             grid: {
-              color: 'rgba(255, 255, 255, 0.33)' // grid line color for x-axis
+              color: 'rgba(255, 255, 255, 0.33)'
             },
             ticks: {
-              color: 'rgba(255, 255, 255, 0.8)' // label color for x-axis
+              color: 'rgba(255, 255, 255, 0.8)'
             },
 
           },
@@ -152,7 +152,11 @@
               intersect: false,
             },
           zoom: {
-            pan: { enabled: true, mode: 'x', threshold: 10 },
+            pan: { 
+              enabled: true, 
+              mode: 'x', 
+              threshold: 10,
+             },
             zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' },
           },
           annotation: {

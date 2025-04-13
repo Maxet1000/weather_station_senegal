@@ -40,11 +40,19 @@
   export let chartData;
   export let chartOptions = {
     responsive: true,
-    maintainAspectRatio: false, // Let the chart fill the container's height if given a fixed height
+    maintainAspectRatio: false,
 
     scales: {
       x: {
-        type: 'time', // Using time scale requires the date-fns adapter
+        type: 'time', 
+        offset: false,
+        grid: {
+          offset: false,
+          color: 'rgba(255, 255, 255, 0.33)',
+        },
+        ticks: {
+          color: 'rgba(255, 255, 255, 0.8)'
+        },
         time: {
           unit: 'month',
         },
@@ -57,16 +65,20 @@
         beginAtZero: true,
         title: {
           display: true,
-          text: 'Précipitation (mm)'
+          text: 'Précipitation (mm)',
+          color: 'white',
+        },
+        grid: {
+          color: 'rgba(255, 255, 255, 0.33)'
         },
         ticks: {
-          stepSize: 30
+          color: 'rgba(255, 255, 255, 0.8)'
         },
       }
     },
     plugins: {
       title: {
-        display: true,
+        display: false,
         text: 'Précipitations Prévues',
         padding: {
           top: 10,
@@ -75,21 +87,17 @@
       },
       legend: {
         display: true,
+        align: 'start',
         labels: {
+          color: 'white',
           generateLabels: function(chart) {
-            return chart.data.datasets
-              .map((dataset, i) => ({
-                text: dataset.label,
-                fillStyle: dataset.backgroundColor,
-                strokeStyle: dataset.borderColor,
-                lineWidth: dataset.borderWidth,
-                hidden: !chart.isDatasetVisible(i),
-                index: i,
-                _customHide: dataset.showInLegend === false
-              }))
-              .filter(label => !label._customHide);
-          }
-        }
+            const defaultLabels = Chart.defaults.plugins.legend.labels.generateLabels(chart);
+            return defaultLabels.filter(label => {
+              const ds = chart.data.datasets[label.datasetIndex];
+              return ds.showInLegend !== false;
+            });
+          },
+        },
       },
       tooltip: {
         mode: 'index',
@@ -138,7 +146,7 @@
     interaction: {
       mode: 'index',
       intersect: false
-    }
+    },
   };
 </script>
 
