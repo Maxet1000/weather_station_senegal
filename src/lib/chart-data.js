@@ -37,66 +37,66 @@ async function fetchCsvValue(url, districtId) {
   }
 }
 
+export async function findNewestValidPath() {
+  let date = new Date();
+  let currentMonth = date.getMonth() + 1; // JavaScript months are 0-indexed, so add 1.
+  let currentYear = date.getFullYear();
+  let m = 0;
 
-export async function getBarValues(districtId, latestMonth) {
-    const monthInt = parseInt(latestMonth);
-    const baseUrl =
-        'https://vito-server-proxy.maxemile-meylaerts.workers.dev/Previsions/reference/precipitation_reference_decade-';
-    const suffix = '_median_2006.csv';
-    const barValues = [];
+  while (m < 100) {
+    // Format the month to always be two digits (e.g., "04")
+    const monthStr = currentMonth.toString().padStart(2, '0');
+    const url = `https://vito-server-proxy.maxemile-meylaerts.workers.dev/Previsions/fc-start-month-${monthStr}_${currentYear}/`;
+    //console.log(`Checking URL: ${url}`);
 
-    let decadeIndex = 3 * (monthInt - 1);
-    while (barValues.length < 18) {
-        if (decadeIndex > 35) {
-            decadeIndex = 0;
-        }
-      
-        const twoDigit = decadeIndex.toString().padStart(2, '0');
-        const url = `${baseUrl}${twoDigit}${suffix}`;
-        
-        const value = await fetchCsvValue(url, districtId);
-        barValues.push(value);
-    
-        decadeIndex++;
+    try {
+      // We use a HEAD request so we don't have to download the whole file.
+      const response = await fetch(url, { method: 'HEAD' });
+      if (response.ok) {
+        // A valid URL is found
+        //console.log(`Found valid URL for ${monthStr}/${currentYear}`);
+        return { year: currentYear, month: monthStr };
+      }
+    } catch (err) {
+      //console.error(`Error checking ${url}:`, err);
     }
 
-    console.log(barValues) 
-    return barValues;
+    // Decrement month; if we're at January, wrap to December of the previous year.
+    currentMonth -= 1;
+    if (currentMonth < 1) {
+      currentMonth = 12;
+      currentYear -= 1;
+    }
+    m++;
+  }
 }
 
-export async function findNewestValidPath() {
-    let date = new Date();
-    let currentMonth = date.getMonth() + 1; // JavaScript months are 0-indexed, so add 1.
-    let currentYear = date.getFullYear();
-    let m = 0;
 
-    while (m < 100) {
-      // Format the month to always be two digits (e.g., "04")
-      const monthStr = currentMonth.toString().padStart(2, '0');
-      const url = `https://vito-server-proxy.maxemile-meylaerts.workers.dev/Previsions/fc-start-month-${monthStr}_${currentYear}/`;
-      //console.log(`Checking URL: ${url}`);
+export async function getBarValues(districtId, latestMonth) {
+  const monthInt = parseInt(latestMonth);
+  const baseUrl =
+      'https://vito-server-proxy.maxemile-meylaerts.workers.dev/Previsions/reference/precipitation_reference_decade-';
+  const suffix = '_median_2006.csv';
+  const barValues = [];
 
-      try {
-        // We use a HEAD request so we don't have to download the whole file.
-        const response = await fetch(url, { method: 'HEAD' });
-        if (response.ok) {
-          // A valid URL is found
-          //console.log(`Found valid URL for ${monthStr}/${currentYear}`);
-          return { year: currentYear, month: monthStr };
-        }
-      } catch (err) {
-        //console.error(`Error checking ${url}:`, err);
+  let decadeIndex = 3 * (monthInt - 1);
+  while (barValues.length < 18) {
+      if (decadeIndex > 35) {
+          decadeIndex = 0;
       }
-
-      // Decrement month; if we're at January, wrap to December of the previous year.
-      currentMonth -= 1;
-      if (currentMonth < 1) {
-        currentMonth = 12;
-        currentYear -= 1;
-      }
-      m++;
-    }
+    
+      const twoDigit = decadeIndex.toString().padStart(2, '0');
+      const url = `${baseUrl}${twoDigit}${suffix}`;
+      
+      const value = await fetchCsvValue(url, districtId);
+      barValues.push(value);
+  
+      decadeIndex++;
   }
+
+  console.log(barValues) 
+  return barValues;
+}
 
 export async function getLineValues(districtId, latestYear, latestMonth) {  
     const monthStr = latestMonth.padStart(2, '0');

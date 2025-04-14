@@ -130,13 +130,13 @@
 
             const lines = [];
             if (barData !== null) {
-              lines.push(`Bar Data: ${barData} mm`);
+              lines.push(`Données Historiques: ${barData} mm`);
             }
             if (lineData !== null) {
-              lines.push(`Line Data: ${lineData} mm`);
+              lines.push(`Médiane: ${lineData} mm`);
             }
             if (rangeStart !== null && rangeEnd !== null) {
-              lines.push(`Range: ${rangeStart} mm - ${rangeEnd} mm`);
+              lines.push(`10% - 90%: ${rangeStart} mm - ${rangeEnd} mm`);
             }
             return lines;
           }

@@ -210,8 +210,7 @@
     let latestYear = newestPath.year;
     let latestMonth = newestPath.month; 
     console.log(latestYear, latestMonth);
-    let districtID_ref = 37;
-    let barValues = await getBarValues(districtID_ref, latestMonth);
+    let barValues = await getBarValues(station, latestMonth);
     let lineValues = await getLineValues(station, latestYear, latestMonth);
     let rangeStartValues = await getRangeStartValues(station, latestYear, latestMonth);
     let rangeEndValues = await getRangeEndValues(station, latestYear, latestMonth);
@@ -242,7 +241,7 @@
         },
         {
             type: 'line',
-            label: 'Prévision Saisonnière (écart du 10e au 90e percentile)',
+            label: 'Prévision Saisonnière \n(écart du 10e au 90e percentile)',
             labelcolor: 'rgba(0, 0, 0, 0)',
             data: zipXY(dateArray, rangeStartValues),
             borderColor: 'rgba(0, 0, 0, 0)',
