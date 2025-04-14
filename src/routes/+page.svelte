@@ -241,7 +241,7 @@
         },
         {
             type: 'line',
-            label: 'Prévision Saisonnière \n(écart du 10e au 90e percentile)',
+            label: 'Prévision Saisonnière (écart du 10e au 90e percentile)',
             labelcolor: 'rgba(0, 0, 0, 0)',
             data: zipXY(dateArray, rangeStartValues),
             borderColor: 'rgba(0, 0, 0, 0)',
